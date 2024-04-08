@@ -1,9 +1,22 @@
-# Sentiment_Analysis_Web_App
+# Aplicación Web de Análisis de Sentimientos
 
-Para el uso y ejecución de la aplicación, se tienen que tener instaldas las dependencias necesarias, entre ellas fastapi (pip install fastapi uvicorn) es la biblioteca principal para construir API web con Python, Playwright (pip install playwright) se utiliza para la automatización del navegador. Ademas BeautifulSoup4 (pip install beautifulsoup4) se utiliza para analizar el HTML, Transformers (pip install transformers) y Pydantic (pip install pydantic) es una biblioteca para la validación de datos en Python.
+Esta aplicación utiliza diversas bibliotecas de Python para analizar sentimientos de reseñas de texto y extraer datos de raspado web de sitios populares de reseñas como Google Reviews, TripAdvisor y Yelp.
 
-El proceso para la ejecucíon de la aplicación es el siguiente:
-1. Abrir una terminal y ejecutar el servidor, en este caso se utiliza FastAPI como backend. Comando: $ uvicorn sentimentAnalysisApp_v9.py
-2. Si se tiene como entorno de desarrollo Visual Studio Code, descargando la extensión Live Server, se puede abrir el archivo "index.html" con este servidor.
-3. Una vez se tenga tanto el cliente como el servidor en ejecución navegar a las rutas locales, siendo en la mayoría de casos, http://127.0.0.1:8000/ y http://127.0.0.1:5500/ para FastAPI como Live Server respectivamente.
-   
+## Requisitos Previos
+
+Antes de ejecutar la aplicación, asegúrate de tener instaladas las siguientes dependencias:
+
+- **FastAPI**: La principal biblioteca para construir APIs web con Python. Instálala usando `pip install fastapi uvicorn`.
+- **Playwright**: Utilizado para automatización del navegador. Instálalo usando `pip install playwright`.
+- **BeautifulSoup4**: Utilizado para análisis de HTML. Instálalo usando `pip install beautifulsoup4`.
+- **Transformers**: Proporciona acceso a modelos preentrenados de NLP. Instálalo usando `pip install transformers`.
+- **Pydantic**: Una biblioteca para validación de datos en Python. Instálala usando `pip install pydantic`.
+
+## Uso
+
+Sigue estos pasos para ejecutar la aplicación:
+
+1. Abre una terminal y comienza el servidor. En este caso, utilizamos FastAPI como backend. Ejecuta el siguiente comando: $ uvicorn sentimentAnalysisApp_v9.py
+2. Si estás utilizando Visual Studio Code como tu entorno de desarrollo, descarga la extensión Live Server. Puedes abrir el archivo `index.html` con este servidor.
+3. Una vez que tanto el cliente como el servidor estén en funcionamiento, navega a las URL locales, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
+
