@@ -23,7 +23,7 @@ app = FastAPI()
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  # Cambia esto al origen de tu interfaz web
+    allow_origins=["http://127.0.0.1:5500"],  # Cambiar esto al origen de la interfaz web si se modifica
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
@@ -90,7 +90,7 @@ def analyze_emotions(review_text: str):
         logger.error("La salida del modelo no es válida.")
         return {"error": "La salida del modelo no es válida."}
         
-
+'''
 @app.post("/predict_emotions")
 async def predict_emotions(item: Review):  
     try:
@@ -101,6 +101,7 @@ async def predict_emotions(item: Review):
     except Exception as e:
         logger.error(f"Error al procesar texto crudo: {e}")
         return {"error": str(e)}
+'''
 # ------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 def analyze_sentiment(review_text: str):
