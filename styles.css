@@ -1,0 +1,115 @@
+/* Estilos CSS */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    position: relative; /* Asegura que las imágenes superpuestas se posicionen correctamente */
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* Asegura que las imágenes superpuestas se posicionen correctamente */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#rawTextInput {
+    width: 100%;
+    height: 150px; /* Altura reducida */
+    resize: vertical; /* Permite que el usuario redimensione verticalmente */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Mismo estilo de fuente */
+    font-size: 16px; /* Tamaño de fuente */
+    border: 1px solid #ccc; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    padding: 10px; /* Espaciado interno */
+    margin-top: 10px; /* Espacio superior */
+}
+
+#rawTextForm h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Mismo estilo de fuente */
+    font-size: 24px; /* Tamaño de fuente */
+    color: #333; /* Color de texto */
+    margin-bottom: 10px; /* Espacio inferior */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Asegura que la barra de carga esté posicionada correctamente */
+}
+
+input[type="text"],
+select {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.resultado {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: rgba(240, 240, 240, 0.9);
+    border-radius: 5px;
+}
+
+.overlay-image {
+    position: absolute;
+    width: 150px; /* Tamaño de la imagen */
+    height: auto;
+    z-index: -1; /* Coloca las imágenes detrás del contenido principal */
+}
+
+#progressBarContainer {
+    width: 100%;
+    height: 5px; /* Altura de la barra de carga */
+    background-color: #ddd; /* Color de fondo de la barra de carga */
+    position: absolute; /* Posiciona la barra de carga */
+    top: 0; /* Se coloca en la parte superior del contenedor */
+    left: 0;
+}
+
+#progressBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 5px;
+    background-color: #007bff;
+    transition: width 7s ease-in-out; /* Duración de ida de 7 segundos */
+    z-index: 9999; /* Asegura que la barra de carga esté por encima de todo */
+}
+
+#progressBar.reverse {
+    transition: width 0.5s ease-in-out; /* Duración de vuelta más rápida */
+}
+
+
+
+
+
