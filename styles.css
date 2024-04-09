@@ -85,6 +85,15 @@ button:hover {
     z-index: -1; /* Coloca las imágenes detrás del contenido principal */
 }
 
+.image {
+    position: absolute; /* Posiciona el elemento de manera absoluta */
+    width: 150px; /* Ancho del elemento */
+    height: auto; /* Altura automática basada en el ancho */
+    z-index: -1; /* Coloca el elemento detrás del contenido principal */
+    left: -130px; /* Posición izquierda inicial */
+    top: 250px; /* Posición superior inicial */
+}
+
 #progressBarContainer {
     width: 100%;
     height: 5px; /* Altura de la barra de carga */
@@ -108,8 +117,3 @@ button:hover {
 #progressBar.reverse {
     transition: width 0.5s ease-in-out; /* Duración de vuelta más rápida */
 }
-
-
-
-
-

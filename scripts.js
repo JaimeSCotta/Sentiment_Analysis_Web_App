@@ -12,8 +12,10 @@
         // Posiciona las imágenes en el lateral izquierdo y derecho
         if (i % 2 === 0) {
             img.style.left = '-100px'; // Lateral izquierdo
+            img.alt = "Imagen ejemplo google maps";
         } else {
             img.style.right = '-100px'; // Lateral derecho
+            img.alt = "Imagen reseña 4 estrellas";
         }
     }
 });
@@ -37,7 +39,7 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
     const responsePromise = fetch("http://127.0.0.1:8000/predict_reviews_from_url?url=" + encodeURIComponent(urlInput) + "&opcion=" + encodeURIComponent(opcionInput), {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json; charset=utf-8"
         }
     });
 
@@ -91,7 +93,7 @@ document.getElementById("rawTextForm").addEventListener("submit", async function
     const response = await fetch("http://127.0.0.1:8000/predict_reviews_from_raw_text", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json; charset=utf-8"
         },
         body: JSON.stringify({
             "Review": rawTextInput

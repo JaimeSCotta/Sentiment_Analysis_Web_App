@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from transformers import pipeline
@@ -8,6 +8,7 @@ from enum import Enum
 from pydantic import BaseModel
 import random
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 
 class Review(BaseModel):
@@ -255,10 +256,10 @@ def predict_reviews_raw(item: Review):
             "Emotion Score": predominant_emotion_score
         }
         logger.info("Resultado final: %s", final_result)
-        return final_result  
+        return JSONResponse(content=final_result, headers={"Content-Type": "application/json; charset=utf-8"}) 
     except Exception as e:
         logger.error(f"Error al procesar texto crudo: {e}")
-        return {"error": str(e)}
+        return JSONResponse(content={"error": str(e)}, headers={"Content-Type": "application/json; charset=utf-8"})
 
 
 @app.post("/predict_reviews_from_url")

@@ -9,6 +9,7 @@ from pydantic import BaseModel
 import random
 from fastapi.middleware.cors import CORSMiddleware
 from database import SqliteDatabaseManager
+from fastapi.responses import JSONResponse
 
 
 class Review(BaseModel):
@@ -77,20 +78,12 @@ def update_sentiment_counts(result, db_manager):
     try:
         # Obtener la etiqueta de sentimiento predominante
         predominant_sentiment = result.get('labels', [])[0]
-        # Acceder al recurso
-        db_manager.__enter__()
         # Actualizar el recuento del sentimiento en la base de datos
-        db_manager.update_sentiment_count(predominant_sentiment)
+        with db_manager:
+            db_manager.update_sentiment_count(predominant_sentiment)
         logger.info(f"Recuento de sentimiento actualizado para '{predominant_sentiment}'.")
     except Exception as e:
         logger.error(f"Error al actualizar el recuento de sentimiento en la base de datos: {e}")
-    finally:
-        # Asegurarse de liberar el recurso
-        try:
-            db_manager.__exit__(None, None, None)
-        except Exception as e:
-            logger.error(f"Error al liberar el recurso: {e}")
-      
 
 
 def analyze_emotions(review_text: str, db_manager):
@@ -284,10 +277,10 @@ def predict_reviews_raw(item: Review, db_manager=Depends(get_db_manager)):
             "Emotion Score": predominant_emotion_score
         }
         logger.info("Resultado final: %s", final_result)
-        return final_result  
+        return JSONResponse(content=final_result, headers={"Content-Type": "application/json; charset=utf-8"})  
     except Exception as e:
         logger.error(f"Error al procesar texto crudo: {e}")
-        return {"error": str(e)}
+        return JSONResponse(content={"error": str(e)}, headers={"Content-Type": "application/json; charset=utf-8"})
 
 
 @app.post("/predict_reviews_from_url")
