@@ -8,25 +8,32 @@ class SqliteDatabaseManager:
 
     def create_tables(self):
         try:
+            print("Creando tabla 'emotions' si no existe...")
+            self.cursor.execute('''CREATE TABLE IF NOT EXISTS emotions
+                                  (emotion TEXT UNIQUE PRIMARY KEY,
+                                  count INTEGER)''')
+            print("Tabla 'emotions' creada correctamente o ya existe.")
+
             print("Creando tabla 'project_emotions' si no existe...")
             self.cursor.execute('''CREATE TABLE IF NOT EXISTS project_emotions
                                   (project_name TEXT UNIQUE PRIMARY KEY,
                                   project_id INTEGER)''')
             print("Tabla 'project_emotions' creada correctamente o ya existe.")
 
-            print("Creando tabla 'emotion_counts' si no existe...")
-            self.cursor.execute('''CREATE TABLE IF NOT EXISTS emotion_counts
+            print("Creando tabla 'project_emotion_counts' si no existe...")
+            self.cursor.execute('''CREATE TABLE IF NOT EXISTS project_emotion_counts
                                   (project_name TEXT,
                                   emotion TEXT,
                                   count INTEGER,
                                   FOREIGN KEY(project_name) REFERENCES project_emotions(project_name),
+                                  FOREIGN KEY(emotion) REFERENCES emotions(emotion),
                                   PRIMARY KEY (project_name, emotion))''')
-            print("Tabla 'emotion_counts' creada correctamente o ya existe.")
+            print("Tabla 'project_emotion_counts' creada correctamente o ya existe.")
             self.conn.commit()
         except Exception as e:
             print(f"Error al crear las tablas: {e}")
+            self.conn.rollback()  # Rollback en caso de error
 
-    # El método create_project ahora verifica si el nombre del proyecto ya existe en la base de datos
     def create_project(self, project_name):
         try:
             self.cursor.execute("INSERT INTO project_emotions (project_name, project_id) VALUES (?, ?)", (project_name, project_name))
@@ -36,7 +43,7 @@ class SqliteDatabaseManager:
             print(f"Error al crear el proyecto en la base de datos: {e}")
             print("El nombre del proyecto ya existe. Por favor, elija otro nombre único.")
             return None
-        
+
     def get_projects(self):
         try:
             self.cursor.execute("SELECT project_name FROM project_emotions")
@@ -45,14 +52,33 @@ class SqliteDatabaseManager:
             return projects
         except Exception as e:
             print(f"Error al obtener los proyectos de la base de datos: {e}")
+            raise  # Relanzar la excepción para que el llamador maneje el error
 
     def update_emotion_count(self, project_name, emotion):
         try:
-            self.cursor.execute("INSERT OR IGNORE INTO emotion_counts (project_name, emotion, count) VALUES (?, ?, 0)", (project_name, emotion))
-            self.cursor.execute("UPDATE emotion_counts SET count = count + 1 WHERE project_name = ? AND emotion = ?", (project_name, emotion))
-            self.conn.commit()
+            self.conn.execute("BEGIN TRANSACTION")  # Iniciar transacción
+            # Actualizar la tabla de emociones globales
+            self.cursor.execute("INSERT OR IGNORE INTO emotions (emotion, count) VALUES (?, 0)", (emotion,))
+            self.cursor.execute("UPDATE emotions SET count = count + 1 WHERE emotion = ?", (emotion,))
+            
+            if project_name is not None:
+                # Verificar si el proyecto existe
+                self.cursor.execute("SELECT COUNT(*) FROM project_emotions WHERE project_name = ?", (project_name,))
+                project_exists = self.cursor.fetchone()[0]
+                if not project_exists:
+                    raise ValueError(f"No existe un proyecto con el nombre '{project_name}'.")
+                
+                # Actualizar la tabla de emociones del proyecto
+                self.cursor.execute("INSERT OR IGNORE INTO project_emotion_counts (project_name, emotion, count) VALUES (?, ?, 0)", (project_name, emotion))
+                self.cursor.execute("UPDATE project_emotion_counts SET count = count + 1 WHERE project_name = ? AND emotion = ?", (project_name, emotion))
+
+            self.conn.commit()  # Confirmar transacción
         except Exception as e:
             print(f"Error al actualizar el recuento de emociones: {e}")
+            self.conn.rollback()  # Rollback en caso de error
+            raise  # Relanzar la excepción para que el llamador maneje el error
+
+
 
     def get_emotion_counts_for_project(self, project_name):
         try:
@@ -61,15 +87,25 @@ class SqliteDatabaseManager:
             project_exists = self.cursor.fetchone()[0]
             if not project_exists:
                 raise ValueError(f"No existe un proyecto con el nombre '{project_name}'.")
-            
+
             # Obtener las emociones asociadas al proyecto
-            self.cursor.execute("SELECT * FROM emotion_counts WHERE project_name = ?", (project_name,))
+            self.cursor.execute("SELECT * FROM project_emotion_counts WHERE project_name = ?", (project_name,))
             rows = self.cursor.fetchall()
             emotion_counts = {row[1]: row[2] for row in rows}
             return emotion_counts
         except Exception as e:
             print(f"Error al obtener los recuentos de emociones para el proyecto '{project_name}': {e}")
+            raise  # Relanzar la excepción para que el llamador maneje el error
 
+    def get_global_emotion_counts(self):
+        try:
+            self.cursor.execute("SELECT * FROM emotions")
+            rows = self.cursor.fetchall()
+            global_emotion_counts = {row[0]: row[1] for row in rows}
+            return global_emotion_counts
+        except Exception as e:
+            print(f"Error al obtener los recuentos de emociones globales: {e}")
+            raise  # Relanzar la excepción para que el llamador maneje el error
 
     def close(self):
         try:
@@ -86,6 +122,7 @@ class SqliteDatabaseManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
 
 
 

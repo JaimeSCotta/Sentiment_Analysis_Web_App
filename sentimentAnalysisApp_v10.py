@@ -75,22 +75,11 @@ def contar_apariciones(sentimientos):
         return "NEUTRAL"
     
 # ---------------------------------------------------------- SQL y analisis de emociones ----------------------------------------------------------- #
-def update_sentiment_counts(result, db_manager):
-    try:
-        # Obtener la etiqueta de sentimiento predominante
-        predominant_sentiment = result.get('labels', [])[0]
-        # Actualizar el recuento del sentimiento en la base de datos
-        with db_manager:
-            db_manager.update_sentiment_count(predominant_sentiment)
-        logger.info(f"Recuento de sentimiento actualizado para '{predominant_sentiment}'.")
-    except Exception as e:
-        logger.error(f"Error al actualizar el recuento de sentimiento en la base de datos: {e}")
-
 
 def analyze_emotions(review_text: str, db_manager):
     if review_text is None:
         logger.error("Texto de revisión no proporcionado.")
-        return {"error": "Texto de revisión no proporcionado."}
+        return None
     
     logger.info(f"Texto de revisión: {review_text}")
     
@@ -103,14 +92,11 @@ def analyze_emotions(review_text: str, db_manager):
     
     # Verificar la salida del modelo
     if 'labels' in result and 'scores' in result:
-        # Actualizar los recuentos de sentimiento si db_manager no es None
-        if db_manager is not None:
-            update_sentiment_counts(result, db_manager)
-        
         return result
     else:
         logger.error("La salida del modelo no es válida.")
-        return {"error": "La salida del modelo no es válida."}
+        return None
+
         
 def get_db_manager():
     return db_manager
@@ -119,12 +105,13 @@ def get_db_manager():
 @app.get("/sentiment_counts")
 async def get_sentiment_counts(db_manager=Depends(get_db_manager)):
     try:
-        db_manager.__enter__()
-        sentiment_counts = db_manager.get_sentiment_counts()
-    finally:
-        db_manager.__exit__(None, None, None)
-    
-    return sentiment_counts
+        with db_manager:
+            sentiment_counts = db_manager.get_global_emotion_counts()
+            return sentiment_counts
+    except Exception as e:
+        logger.error(f"Error al obtener recuentos de sentimiento: {e}")
+        return JSONResponse(status_code=500, content={"error": "Error al obtener recuentos de sentimiento"})
+
 # ------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 def analyze_sentiment(review_text: str):
@@ -256,15 +243,22 @@ async def validate_url_and_option(url: str, opcion: OpcionEnum):
 
 
 @app.post("/predict_reviews_from_raw_text")
-def predict_reviews_raw(item: Review, db_manager=Depends(get_db_manager)):
+def predict_reviews_raw(item: Review, project_name: str = None, db_manager=Depends(get_db_manager)):
     logger.info(f"Recibida solicitud para procesar texto crudo: {item.Review}") 
     try:
         # Realizar análisis de emociones
         result1 = analyze_emotions(item.Review, db_manager)  
+        if result1 is None:
+            raise Exception("Error al analizar emociones")
+        
         max_score_index = result1["scores"].index(max(result1["scores"]))
         predominant_emotion = result1["labels"][max_score_index]
         predominant_emotion_score = result1["scores"][max_score_index]
         logger.info("Clasificación de emociones completada.")
+        
+        # Actualizar la base de datos con la emoción y el proyecto correspondiente si se proporciona un proyecto
+        with db_manager:
+            db_manager.update_emotion_count(project_name, predominant_emotion)
         
         # Realizar análisis de sentimiento
         result2 = analyze_sentiment(item.Review) 
@@ -282,6 +276,8 @@ def predict_reviews_raw(item: Review, db_manager=Depends(get_db_manager)):
     except Exception as e:
         logger.error(f"Error al procesar texto crudo: {e}")
         return JSONResponse(content={"error": str(e)}, headers={"Content-Type": "application/json; charset=utf-8"})
+
+
 
 
 @app.post("/predict_reviews_from_url")
