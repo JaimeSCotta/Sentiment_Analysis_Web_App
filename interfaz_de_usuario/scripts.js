@@ -62,13 +62,9 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
             // Mostrar el error al usuario
             document.getElementById("resultado").innerText = "Error: " + data.error;
         } else {
-            if (data.overall_sentiment_label && data.overall_average_score) {
                 // Construir el mensaje a mostrar
-                const message = `Overall Sentiment Label: ${data.overall_sentiment_label}\nOverall Average Score: ${data.overall_average_score.toFixed(4)}`;
+                const message = `Sentiment Label: ${data["Analisis Label"]}\nScore: ${data.Score.toFixed(4)}\nEmotion Label: ${data["Emotion Label"]}\nEmotion Score: ${data["Emotion Score"].toFixed(4)}`;
                 document.getElementById("resultado").innerText = message;
-            } else {
-                document.getElementById("resultado").innerText = "Error: Datos inesperados recibidos del servidor.";
-            }
         }
     } catch (error) {
         if (!document.getElementById("resultado").innerText) {

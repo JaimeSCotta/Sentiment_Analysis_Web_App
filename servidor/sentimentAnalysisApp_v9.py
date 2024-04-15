@@ -74,14 +74,38 @@ def contar_apariciones(sentimientos):
         return "NEUTRAL"
     
 # ---------------------------------------------------------- SQL y analisis de emociones ----------------------------------------------------------- #
+def contar_apariciones_emociones(emociones):
+    # Inicializar contadores
+    contador_happy = 0
+    contador_sad = 0
+    contador_angry = 0
+    
+    # Contar apariciones de cada emoción
+    for emocion in emociones:
+        if emocion == "happy":
+            contador_happy += 1
+        elif emocion == "sad":
+            contador_sad += 1
+        elif emocion == "angry":
+            contador_angry += 1
+    
+    # Determinar la emoción dominante
+    if contador_happy > contador_sad and contador_happy > contador_angry:
+        return "happy"
+    elif contador_sad > contador_happy and contador_sad > contador_angry:
+        return "sad"
+    elif contador_angry > contador_happy and contador_angry > contador_sad:
+        return "angry"
+    else:
+        return "neutral"  # Si todas las emociones tienen el mismo recuento
+
+
 def update_sentiment_counts(result, db_manager):
-    try:
-        # Obtener la etiqueta de sentimiento predominante
-        predominant_sentiment = result.get('labels', [])[0]
+    try:        
         # Actualizar el recuento del sentimiento en la base de datos
         with db_manager:
-            db_manager.update_sentiment_count(predominant_sentiment)
-        logger.info(f"Recuento de sentimiento actualizado para '{predominant_sentiment}'.")
+            db_manager.update_sentiment_count(result)
+        logger.info(f"Recuento de sentimiento actualizado para '{result}'.")
     except Exception as e:
         logger.error(f"Error al actualizar el recuento de sentimiento en la base de datos: {e}")
 
@@ -102,14 +126,42 @@ def analyze_emotions(review_text: str, db_manager):
     
     # Verificar la salida del modelo
     if 'labels' in result and 'scores' in result:
+        predominant_sentiment = result.get('labels', [])[0]
         # Actualizar los recuentos de sentimiento si db_manager no es None
         if db_manager is not None:
-            update_sentiment_counts(result, db_manager)
+            update_sentiment_counts(predominant_sentiment, db_manager)
         
         return result
     else:
         logger.error("La salida del modelo no es válida.")
         return {"error": "La salida del modelo no es válida."}
+    
+async def analyze_emotions_severalReviews(reviews: list, db_manager):
+    emotions = [review for review in reviews]
+    scores = {'happy': [], 'sad': [], 'angry': []}
+    labels = []
+    
+    for review_text in emotions:
+        try:
+            emotion_result = analyze_emotions(review_text, None)
+            predominant_emotion = emotion_result["labels"][0]
+            scores[predominant_emotion].append(emotion_result["scores"][0])
+            labels.append(predominant_emotion)
+        except Exception as e:
+            logger.error(f"Error al analizar emociones de la reseña: {e}")
+
+    overall_emotion_score = sum(sum(scores.values(), [])) / sum(len(v) for v in scores.values())
+    overall_emotion_label = contar_apariciones_emociones(labels)
+
+    if db_manager is not None:
+        update_sentiment_counts(overall_emotion_label, db_manager)
+    
+    logger.info("Scores totales: %s", scores)
+    logger.info("Labels totales: %s", labels)
+    logger.info("Average Score: %s", overall_emotion_score)
+    logger.info("Overall Emotion Label: %s", overall_emotion_label)
+    
+    return overall_emotion_score, overall_emotion_label
         
 def get_db_manager():
     return db_manager
@@ -269,7 +321,7 @@ def predict_reviews_raw(item: Review, db_manager=Depends(get_db_manager)):
         result2 = analyze_sentiment(item.Review) 
         logger.info("Análisis de sentimiento completado.")
         
-        # Crear el resultado final combinando ambas análisis
+        # Crear el resultado final combinando ambos análisis
         final_result = {
             "Analisis Label": result2["predictions"][0]["label"],  
             "Score": result2["predictions"][0]["score"],           
@@ -284,21 +336,36 @@ def predict_reviews_raw(item: Review, db_manager=Depends(get_db_manager)):
 
 
 @app.post("/predict_reviews_from_url")
-async def predict_reviews_url(url: str = Query(..., description="URL del restaurante específico"), opcion: OpcionEnum = Query(..., description="Selecciona una opción: GoogleReview, TripAdvisor o Yelp")):
+async def predict_reviews_url(url: str = Query(..., description="URL del restaurante específico"), opcion: OpcionEnum = Query(..., description="Selecciona una opción: GoogleReview, TripAdvisor o Yelp"), db_manager=Depends(get_db_manager)):
     logger.info(f"Iniciando scraping de reseñas ({opcion})...")
     try:
+        # Realizar análisis de emociones
         await validate_url_and_option(url, opcion)
         reviews = await scrape_with_retry(url, opcion)
         overall_average_score, overall_sentiment_label = await analyze_sentiment_severalReviews(reviews)
         logger.info("Análisis de sentimiento completado.")
-        return {"overall_sentiment_label": overall_sentiment_label, "overall_average_score": overall_average_score}
+    
+        # Realizar análisis de sentimiento
+        overall_emotion_score, overall_emotion_label = await analyze_emotions_severalReviews(reviews, db_manager)
+        logger.info("Clasificación de emociones completada.")
+
+        # Crear el resultado final combinando ambos análisis
+        final_result = {
+            "Analisis Label": overall_sentiment_label,  
+            "Score": overall_average_score,           
+            "Emotion Label": overall_emotion_label,
+            "Emotion Score": overall_emotion_score
+        }
+        logger.info("Resultado final: %s", final_result)
+
+        return JSONResponse(content=final_result, headers={"Content-Type": "application/json; charset=utf-8"}) 
     except ValueError as ve:
         error_message = f"The provided URL does not seem to be from {opcion}." 
         logger.error(f"Error de validación: {error_message}")
-        return {"error": error_message}
+        return JSONResponse(content={"error": error_message}, headers={"Content-Type": "application/json; charset=utf-8"})
     except Exception as e:
         logger.error(f"Error durante el scraping: {e}")
-        return {"error": str(e)}
+        return JSONResponse(content={"error": str(e)}, headers={"Content-Type": "application/json; charset=utf-8"})
 
 
 @app.get('/')
