@@ -33,14 +33,24 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
 
     const urlInput = document.getElementById("urlInput").value;
     const opcionInput = document.getElementById("opcionInput").value;
+    const projectName = document.getElementById("projectSelect").value;
 
+    console.log("Valor de urlInput:", urlInput);
+    console.log("Valor de opcionInput:", opcionInput);
+    console.log("Valor de projectName:", projectName);
+    
     let timeoutId; // Variable para almacenar el identificador del temporizador
 
-    const responsePromise = fetch("http://127.0.0.1:8000/predict_reviews_from_url?url=" + encodeURIComponent(urlInput) + "&opcion=" + encodeURIComponent(opcionInput), {
+    const responseQ = await fetch("http://127.0.0.1:8000/predict_reviews_from_url", {
         method: "POST",
         headers: {
             "Content-Type": "application/json; charset=utf-8"
-        }
+        },
+        body: JSON.stringify({
+            "url": urlInput,
+            "opcion": opcionInput,
+            "project_name": projectName
+        })
     });
 
     // Establecer el tiempo de espera para mostrar el mensaje de retrying
@@ -50,7 +60,7 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
 
     try {
         // Esperar la respuesta
-        const response = await responsePromise;
+        const response = await responseQ;
         clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes del tiempo de espera
 
         const data = await response.json();
@@ -62,19 +72,15 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
             // Mostrar el error al usuario
             document.getElementById("resultado").innerText = "Error: " + data.error;
         } else {
-            if (data.overall_sentiment_label && data.overall_average_score) {
-                // Construir el mensaje a mostrar
-                const message = `Sentiment Label: ${data["Analisis Label"]}\nScore: ${data.Score.toFixed(4)}\nEmotion Label: ${data["Emotion Label"]}\nEmotion Score: ${data["Emotion Score"].toFixed(4)}`;
-                document.getElementById("resultado").innerText = message;
-            } else {
-                document.getElementById("resultado").innerText = "Error: Datos inesperados recibidos del servidor.";
-            }
-        }
-    } catch (error) {
-        if (!document.getElementById("resultado").innerText) {
-            document.getElementById("resultado").innerText = "Something went wrong, retrying...";
-        }
+            // Construir el mensaje a mostrar
+            const message = `Sentiment Label: ${data["Analisis Label"]}\nScore: ${data.Score.toFixed(4)}\nEmotion Label: ${data["Emotion Label"]}\nEmotion Score: ${data["Emotion Score"].toFixed(4)}`;
+            document.getElementById("resultado").innerText = message;
     }
+} catch (error) {
+    if (!document.getElementById("resultado").innerText) {
+        document.getElementById("resultado").innerText = "Something went wrong, retrying...";
+    }
+}
 });
 
 
@@ -89,6 +95,8 @@ document.getElementById("rawTextForm").addEventListener("submit", async function
     document.getElementById("progressBar").style.width = "100%";
 
     const rawTextInput = document.getElementById("rawTextInput").value;
+    const projectName = document.getElementById("projectSelect").value;
+    console.log("Valor de projectName:", projectName);
 
     const response = await fetch("http://127.0.0.1:8000/predict_reviews_from_raw_text", {
         method: "POST",
@@ -96,7 +104,12 @@ document.getElementById("rawTextForm").addEventListener("submit", async function
             "Content-Type": "application/json; charset=utf-8"
         },
         body: JSON.stringify({
-            "Review": rawTextInput
+            "item": {
+                "Review": rawTextInput
+            },
+            "project_name": {
+                "ProjectName": projectName
+            },
         })
     });
     
@@ -116,6 +129,8 @@ document.getElementById("rawTextForm").addEventListener("submit", async function
     }
     document.getElementById("rawTextResultado").innerText = message;
 });
+
+
 
 
 // --------------------- Código para manejar proyectos --------------------- //
@@ -146,6 +161,16 @@ async function loadProjects() {
             option.textContent = project;
             projectSelect.appendChild(option);
         });
+
+        // Obtener el nombre del nuevo proyecto creado (puedes obtenerlo de la respuesta del servidor o del campo de entrada)
+        const newProjectName = document.getElementById("newProjectNameInput").value; // Obtener el valor del campo de entrada
+        // Buscar el elemento de opción correspondiente al nuevo proyecto
+        const newProjectOption = projectSelect.querySelector(`option[value="${newProjectName}"]`);
+        // Seleccionar el nuevo proyecto si se encontró
+        if (newProjectOption) {
+            newProjectOption.selected = true;
+        }
+
     } catch (error) {
         console.error("Error loading projects:", error);
         alert("Error al cargar los proyectos. Por favor, inténtelo de nuevo.");
@@ -157,10 +182,10 @@ window.addEventListener('DOMContentLoaded', async function() {
     await loadProjects();
 });
 
-// Manejar la creación de un nuevo proyecto
-document.getElementById("createNewProjectButton").addEventListener("click", async function(event) {
+// Código para manejar la creación de un nuevo proyecto desde el cuadro de texto
+document.getElementById("createNewProjectTextButton").addEventListener("click", async function(event) {
     event.preventDefault();
-    const newProjectName = document.getElementById("newProjectNameInput").value;
+    const newProjectName = document.getElementById("newProjectTextInput").value;
     if (!newProjectName) {
         alert("Por favor, introduzca un nombre para el nuevo proyecto.");
         return;
@@ -178,15 +203,23 @@ document.getElementById("createNewProjectButton").addEventListener("click", asyn
         });
 
         if (response.ok) {
+            const responseData = await response.json(); // Obtener los datos de la respuesta
+            const createdProjectName = responseData.message.split("'")[1]; // Obtener el nombre del proyecto creado desde el mensaje de la respuesta
             await loadProjects(); // Cargar proyectos nuevamente después de crear uno nuevo
-            document.getElementById("newProjectForm").style.display = "none";
-            document.getElementById("newProjectNameInput").value = "";
+            document.getElementById("newProjectTextInput").value = "";
+            // Buscar el elemento de opción correspondiente al nuevo proyecto
+            const newProjectOption = projectSelect.querySelector(`option[value="${createdProjectName}"]`);
+            // Seleccionar el nuevo proyecto si se encontró
+            if (newProjectOption) {
+                newProjectOption.selected = true;
+            }
         } else {
             throw new Error("Failed to create new project");
         }
     } catch (error) {
         console.error("Error creating new project:", error);
-        alert("Error al crear el nuevo proyecto. Por favor, inténtelo de nuevo.");
+        alert("Error creating the new project, please check if the name already exists. Please try again.");
     }
 });
+
 

@@ -10,29 +10,42 @@ class SqliteDatabaseManager:
         try:
             print("Creando tabla 'emotions' si no existe...")
             self.cursor.execute('''CREATE TABLE IF NOT EXISTS emotions
-                                  (emotion TEXT UNIQUE PRIMARY KEY,
-                                  count INTEGER)''')
+                                (emotion TEXT UNIQUE PRIMARY KEY,
+                                count INTEGER)''')
             print("Tabla 'emotions' creada correctamente o ya existe.")
 
             print("Creando tabla 'project_emotions' si no existe...")
             self.cursor.execute('''CREATE TABLE IF NOT EXISTS project_emotions
-                                  (project_name TEXT UNIQUE PRIMARY KEY,
-                                  project_id INTEGER)''')
+                                (project_name TEXT UNIQUE PRIMARY KEY,
+                                project_id INTEGER)''')
             print("Tabla 'project_emotions' creada correctamente o ya existe.")
 
             print("Creando tabla 'project_emotion_counts' si no existe...")
             self.cursor.execute('''CREATE TABLE IF NOT EXISTS project_emotion_counts
-                                  (project_name TEXT,
-                                  emotion TEXT,
-                                  count INTEGER,
-                                  FOREIGN KEY(project_name) REFERENCES project_emotions(project_name),
-                                  FOREIGN KEY(emotion) REFERENCES emotions(emotion),
-                                  PRIMARY KEY (project_name, emotion))''')
+                                (project_name TEXT,
+                                emotion TEXT,
+                                count INTEGER,
+                                FOREIGN KEY(project_name) REFERENCES project_emotions(project_name),
+                                FOREIGN KEY(emotion) REFERENCES emotions(emotion),
+                                PRIMARY KEY (project_name, emotion))''')
             print("Tabla 'project_emotion_counts' creada correctamente o ya existe.")
-            self.conn.commit()
+
+            # Verificar si la tabla de proyectos está vacía
+            self.cursor.execute("SELECT COUNT(*) FROM project_emotions")
+            project_count = self.cursor.fetchone()[0]
+            if project_count == 0:
+                # Si está vacía, crear un proyecto "Default"
+                self.create_project("Default")
+                print("Se ha creado automáticamente el proyecto 'Default'.")
+
+            self.conn.commit()  # Solo confirmar si no hubo errores
+
         except Exception as e:
             print(f"Error al crear las tablas: {e}")
             self.conn.rollback()  # Rollback en caso de error
+
+
+
 
     def create_project(self, project_name):
         try:
@@ -114,6 +127,7 @@ class SqliteDatabaseManager:
         except Exception as e:
             print(f"Error al cerrar la conexión a la base de datos: {e}")
 
+    
     def __enter__(self):
         self.conn = sqlite3.connect(self.db_name)
         self.cursor = self.conn.cursor()
