@@ -45,19 +45,26 @@
             <select id="projectSelect" title="Seleccionar proyecto">
                 <!-- Opciones de proyectos existentes se cargarán aquí dinámicamente -->
             </select>
-            <div id="newProjectForm" style="display: none;">
+            <div id="newProjectForm" class="hidden">
                 <input type="text" id="newProjectNameInput" placeholder="Projects name">
-                <button id="createNewProjectButton">Crear</button>
+                <button type="submit" id="createNewProjectButton">Crear</button>
+            </div>
+            <!-- Nuevo elemento para mostrar emociones asociadas al proyecto -->
+            <div id="projectEmotions" class="visible">
+                <h3>Emotions for Selected Project</h3>
+                <div id="emotionList"></div>
             </div>
         </div>
+        
         <!-- Cuadro de texto para nuevo proyecto -->
         <div id="newProjectTextInputContainer">
             <input type="text" id="newProjectTextInput" placeholder="New Projects name">
-            <button id="createNewProjectTextButton">Create New Project</button>
+            <button type="submit" id="createNewProjectTextButton">Create New Project</button>
         </div>
     </div>
 
-    <script src="scripts_v2.js"></script>
+    <script src="scripts_v3.js"></script>
 </body>
 </html>
+
 
