@@ -1,10 +1,9 @@
 import logging
 import asyncio
-from fastapi import FastAPI, Query, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException, Request
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from transformers import pipeline
-from enum import Enum
 from pydantic import BaseModel
 import random
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,10 +21,8 @@ class ProjectName(BaseModel):
 class Url(BaseModel):
     Url: str
 
-class OpcionEnum(str, Enum):
-    GoogleReview = "GoogleReview"
-    TripAdvisor = "TripAdvisor"
-    Yelp = "Yelp"
+class OpcionEnum(BaseModel):
+    OpcionEnum: str
 
 app = FastAPI()
 
@@ -117,12 +114,12 @@ def update_sentiment_counts(result, db_manager):
         logger.error(f"Error al actualizar el recuento de sentimiento en la base de datos: {e}")
 
 
-def analyze_emotions(review_text: str, db_manager):
+def analyze_emotions(review_text: str):
     if review_text is None:
         logger.error("Texto de revisión no proporcionado.")
         return {"error": "Texto de revisión no proporcionado."}
     
-    logger.info(f"Texto de revisión: {review_text}")
+    logger.info(f"Texto para analizar la emocion: {review_text}")
     
     # Ejecutar el modelo zero-shot-classification
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
@@ -141,14 +138,14 @@ def analyze_emotions(review_text: str, db_manager):
         return {"error": "La salida del modelo no es válida."}
     
 
-async def analyze_emotions_severalReviews(reviews: list, db_manager):
+async def analyze_emotions_severalReviews(reviews: list):
     emotions = [review for review in reviews]
     scores = {'happy': [], 'sad': [], 'angry': []}
     labels = []
     
     for review_text in emotions:
         try:
-            emotion_result = analyze_emotions(review_text, None)
+            emotion_result = analyze_emotions(review_text)
             predominant_emotion = emotion_result["labels"][0]
             scores[predominant_emotion].append(emotion_result["scores"][0])
             labels.append(predominant_emotion)
@@ -182,6 +179,7 @@ async def get_sentiment_counts(db_manager=Depends(get_db_manager)):
 # ------------------------------------------------------------------------------------------------------------------------------------------------- #
 
 def analyze_sentiment(review_text: str):
+    logger.info(f"Texto para analizar el sentimiento: {review_text}")
     predictions = sentiment_pipeline(review_text)
     mapped_predictions = [{'label': map_label(prediction['label']), 'score': prediction['score']} for prediction in predictions]
     return {'predictions': mapped_predictions}
@@ -193,6 +191,7 @@ async def analyze_sentiment_severalReviews(reviews: list):
     
     for review_text in predictions:
         try:
+            logger.info(f"Texto para analizar el sentimiento: {review_text}")
             prediction = sentiment_pipeline(review_text)
             scores.extend([p['score'] for p in prediction])
             mapped_labels = [map_label(p['label']) for p in prediction]
@@ -259,13 +258,13 @@ async def scrape_with_retry(url, opcion):
                 await page.goto(url)
                 await page.wait_for_timeout(1000)
 
-                if opcion == OpcionEnum.GoogleReview:
+                if opcion == "GoogleReview":
                     logger.info("Aceptando cookies GoogleReviews...")
                     cookie_dialog_selector = 'text="Aceptar todo"'
-                elif opcion == OpcionEnum.TripAdvisor:
+                elif opcion == "TripAdvisor":
                     logger.info("Aceptando cookies TripAdvisor...")
                     cookie_dialog_selector = 'text="Acepto"'
-                elif opcion == OpcionEnum.Yelp:
+                elif opcion == "Yelp":
                     logger.info("Aceptando cookies Yelp...")
                     cookie_dialog_selector = 'text="Permitir todas las cookies"'   #Aceptar solo las cookies necesarias
                 
@@ -273,11 +272,11 @@ async def scrape_with_retry(url, opcion):
                     logger.info("Aceptando cookies...")
                     await page.click(cookie_dialog_selector)
                     
-                if opcion == OpcionEnum.GoogleReview:
+                if opcion == "GoogleReview":
                     reviews = await extract_google_reviews(page)
-                elif opcion == OpcionEnum.TripAdvisor:
+                elif opcion == "TripAdvisor":
                     reviews = await extract_tripadvisor_reviews(page)
-                elif opcion == OpcionEnum.Yelp:
+                elif opcion == "Yelp":
                     reviews = await extract_yelp_reviews(page)
                 
                 logger.info("Cerrando el navegador...")
@@ -291,18 +290,20 @@ async def scrape_with_retry(url, opcion):
             await asyncio.sleep(1.5 ** attempt)  # Backoff exponencial
     raise Exception("The extraction could not be completed after several attempts.")
 
-async def validate_url_and_option(url: Url, opcion: OpcionEnum):
-    if opcion == OpcionEnum.GoogleReview:
-        if "google." not in url.Url:
-            logger.error(f"The provided URL does not seem to be from Google Reviews: {url.Url}")
+async def validate_url_and_option(url, opcion):
+    logger.info(f"Validando URL {url}") 
+    logger.info(f"Validando opcion {opcion}") 
+    if opcion == "GoogleReview":
+        if "google." not in url:
+            logger.error(f"The provided URL does not seem to be from Google Reviews: {url}")
             raise ValueError("The provided URL does not seem to be from Google Reviews.")
-    elif opcion == OpcionEnum.TripAdvisor:
-        if "tripadvisor." not in url.Url:
-            logger.error(f"The provided URL does not seem to be from TripAdvisor: {url.Url}")
+    elif opcion == "TripAdvisor":
+        if "tripadvisor." not in url:
+            logger.error(f"The provided URL does not seem to be from TripAdvisor: {url}")
             raise ValueError("The provided URL does not seem to be from TripAdvisor.")
-    elif opcion == OpcionEnum.Yelp:
-        if "yelp." not in url.Url:
-            logger.error(f"The provided URL does not seem to be from Yelp: {url.Url}")
+    elif opcion == "Yelp":
+        if "yelp." not in url:
+            logger.error(f"The provided URL does not seem to be from Yelp: {url}")
             raise ValueError("The provided URL does not seem to be from Yelp.")
     else:
         logger.error(f"Invalid option: {opcion}")
@@ -315,7 +316,7 @@ def predict_reviews_raw(item: Review, project_name: ProjectName, db_manager=Depe
     logger.info("Nombre del proyecto recibido: %s", project_name.ProjectName)
     try:
         # Realizar análisis de emociones
-        result1 = analyze_emotions(item.Review, db_manager)  
+        result1 = analyze_emotions(item.Review)  
         if result1 is None:
             raise Exception("Error al analizar emociones")
         
@@ -348,16 +349,16 @@ def predict_reviews_raw(item: Review, project_name: ProjectName, db_manager=Depe
 
 @app.post("/predict_reviews_from_url")
 async def predict_reviews_url(url: Url, opcion: OpcionEnum, project_name: ProjectName, db_manager=Depends(get_db_manager)):
-    logger.info(f"Iniciando scraping de reseñas ({opcion})...")
+    logger.info(f"Iniciando scraping de reseñas ({opcion.OpcionEnum})...")
     try:
         # Realizar análisis de emociones
-        await validate_url_and_option(url.Url, opcion)
-        reviews = await scrape_with_retry(url.Url, opcion)
+        await validate_url_and_option(url.Url, opcion.OpcionEnum)
+        reviews = await scrape_with_retry(url.Url, opcion.OpcionEnum)
         overall_average_score, overall_sentiment_label = await analyze_sentiment_severalReviews(reviews)
         logger.info("Análisis de sentimiento completado.")
     
         # Realizar análisis de sentimiento
-        overall_emotion_score, overall_emotion_label = await analyze_emotions_severalReviews(reviews, db_manager)
+        overall_emotion_score, overall_emotion_label = await analyze_emotions_severalReviews(reviews)
         logger.info("Clasificación de emociones completada.")
 
         # Actualizar la base de datos con la emoción y el proyecto correspondiente si se proporciona un proyecto
@@ -375,7 +376,7 @@ async def predict_reviews_url(url: Url, opcion: OpcionEnum, project_name: Projec
 
         return JSONResponse(content=final_result, headers={"Content-Type": "application/json; charset=utf-8"}) 
     except ValueError as ve:
-        error_message = f"The provided URL does not seem to be from {opcion}." 
+        error_message = f"The provided URL does not seem to be from {opcion.OpcionEnum}." 
         logger.error(f"Error de validación: {error_message}")
         return JSONResponse(content={"error": error_message}, headers={"Content-Type": "application/json; charset=utf-8"})
     except Exception as e:
