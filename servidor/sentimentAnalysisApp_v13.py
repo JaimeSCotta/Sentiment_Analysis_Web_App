@@ -1,14 +1,15 @@
 import logging
 import asyncio
+from random import randint
 from fastapi import FastAPI, Depends, HTTPException, Request
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from transformers import pipeline
 from pydantic import BaseModel
-import random
 from fastapi.middleware.cors import CORSMiddleware
 from database_v2 import SqliteDatabaseManager
 from fastapi.responses import JSONResponse
+from time import sleep
 
 
 class Review(BaseModel):
@@ -252,8 +253,10 @@ async def scrape_with_retry(url, opcion):
             async with async_playwright() as pw:
                 browser = await pw.chromium.launch(headless=True)
                 context = await browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36')
+                await asyncio.sleep(randint(1,5))
                 page = await context.new_page() 
-                await asyncio.sleep(random.uniform(1, 3))
+                await asyncio.sleep(randint(1,5))
+                #await asyncio.sleep(random.uniform(1, 3))
                 logger.info(f"Navegando a la URL: {url}")
                 await page.goto(url)
                 await page.wait_for_timeout(1000)
