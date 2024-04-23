@@ -1,5 +1,9 @@
+# Intento de evitar el bloqueo por bot de tripAdvisor, sin finalizar
+
 import logging
 import asyncio
+from random import randint
+from fake_useragent import UserAgent
 from random import randint
 from fastapi import FastAPI, Depends, HTTPException, Request
 from playwright.async_api import async_playwright
@@ -223,6 +227,7 @@ async def extract_google_reviews(page):
     return reviews_text
 
 async def extract_tripadvisor_reviews(page):
+    await asyncio.sleep(randint(1,5))
     logger.info("Esperando a que aparezcan las reseñas de TripAdvisor...")
     await page.screenshot(path=f"C:/Users/jaime/Desktop/Sentiment_Analysis_Web_App/screenshot1.png") ##########################################################
     await page.wait_for_selector('.JguWG', timeout=10000)
@@ -232,11 +237,16 @@ async def extract_tripadvisor_reviews(page):
     review_elements = soup.select('.JguWG')
     reviews_text = [review.text.strip() for review in review_elements]
     logger.info(f"Se han extraído {len(reviews_text)} reseñas de TripAdvisor.")
+
+    for review in soup.find_all('div', {'class': 'review-container'}): 
+        review_text = review.find('p', {'class': 'partial_entry'}).text
+        logger.info(f"Texto yelp sentimiento: {review_text}")
     return reviews_text
 
 async def extract_yelp_reviews(page):
     logger.info("Esperando a que aparezcan las reseñas de Yelp...")
     await page.wait_for_selector('.raw__09f24__T4Ezm', timeout=10000)
+    await asyncio.sleep(randint(1,5))
     logger.info("Las reseñas de Yelp están disponibles. Extrayendo...")
     html = await page.inner_html('body')
     soup = BeautifulSoup(html, 'html.parser')
@@ -247,37 +257,59 @@ async def extract_yelp_reviews(page):
 
 async def scrape_with_retry(url, opcion):
     attempt = 0
+    ua = UserAgent()
     while attempt < 3:
         try:
             logger.info(f"Iniciando intento de scraping ({attempt + 1})...")
             async with async_playwright() as pw:
-                browser = await pw.chromium.launch(headless=True)
-                context = await browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36')
-                await asyncio.sleep(randint(1,5))
+                browser = await pw.chromium.launch(headless=False)
+                context = await browser.new_context(user_agent=ua.random)
+                #context = await browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36')
+                await asyncio.sleep(randint(3, 7))  # Espera aleatoria entre 3 y 7 segundos
                 page = await context.new_page() 
-                await asyncio.sleep(randint(1,5))
-                #await asyncio.sleep(random.uniform(1, 3))
+                await asyncio.sleep(randint(1, 3))  # Espera aleatoria entre 1 y 3 segundos
                 logger.info(f"Navegando a la URL: {url}")
                 await page.goto(url)
                 await page.wait_for_timeout(1000)
+                await asyncio.sleep(randint(1,5))
+
+                # Verificar si se ha detectado un bloqueo
+                if opcion == "TripAdvisor":
+                    await page.wait_for_timeout(1000)
+                    html = await page.inner_html('body')
+                    soup = BeautifulSoup(html, 'html.parser')
+                    captcha_title = soup.find('p', {'class': 'captcha__human__title'})
+                    if captcha_title and captcha_title.text:
+                        logger.error("¡Has sido bloqueado por TripAdvisor!")
+                        await browser.close()
+                        return None  # Devolver None indica que el scraping no se completó debido al bloqueo
+                    else:
+                        logger.info("No se ha detectado bloqueo.")
+
 
                 if opcion == "GoogleReview":
                     logger.info("Aceptando cookies GoogleReviews...")
+                    await page.wait_for_timeout(1000)
                     cookie_dialog_selector = 'text="Aceptar todo"'
                 elif opcion == "TripAdvisor":
+                    await asyncio.sleep(randint(3, 7))
+                    await page.wait_for_timeout(1000)
                     logger.info("Aceptando cookies TripAdvisor...")
                     cookie_dialog_selector = 'text="Acepto"'
                 elif opcion == "Yelp":
                     logger.info("Aceptando cookies Yelp...")
+                    await page.wait_for_timeout(1000)
                     cookie_dialog_selector = 'text="Permitir todas las cookies"'   #Aceptar solo las cookies necesarias
                 
                 if await page.is_visible(cookie_dialog_selector):
                     logger.info("Aceptando cookies...")
+                    await page.wait_for_timeout(1000)
                     await page.click(cookie_dialog_selector)
                     
                 if opcion == "GoogleReview":
                     reviews = await extract_google_reviews(page)
                 elif opcion == "TripAdvisor":
+                    await asyncio.sleep(randint(3, 7))
                     reviews = await extract_tripadvisor_reviews(page)
                 elif opcion == "Yelp":
                     reviews = await extract_yelp_reviews(page)
@@ -436,15 +468,3 @@ async def get_project_emotions(project_name: str):
 @app.get('/')
 async def read_root():
     return {"message": "Welcome to the review sentiment analysis API"}
-
-
-# Esta ya es la mejor version que tengo, en las sucesivas se intentara añadir una opcion de idioma y mediante el uso de mas de un modelo, predecir
-# el sentimiento positivo o negativo en base al idioma
-# solucionado el bloqueo de yelp
-# se intento con theFork pero bloqueaba por bot
-
-# ejemplo para comparar opiniones tripAdv> 
-            # link en inlges: https://www.tripadvisor.com/ShowUserReviews-g187499-d14171649-r626683710-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-            # link en español: https://www.tripadvisor.es/Restaurant_Review-g187499-d14171649-Reviews-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-
-#The staff was friendly and attentive throughout our dining experience.

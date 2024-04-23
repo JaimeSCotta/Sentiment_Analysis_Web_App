@@ -371,15 +371,3 @@ async def predict_reviews_url(url: str = Query(..., description="URL del restaur
 @app.get('/')
 async def read_root():
     return {"message": "Welcome to the review sentiment analysis API"}
-
-
-# Esta ya es la mejor version que tengo, en las sucesivas se intentara añadir una opcion de idioma y mediante el uso de mas de un modelo, predecir
-# el sentimiento positivo o negativo en base al idioma
-# solucionado el bloqueo de yelp
-# se intento con theFork pero bloqueaba por bot
-
-# ejemplo para comparar opiniones tripAdv> 
-            # link en inlges: https://www.tripadvisor.com/ShowUserReviews-g187499-d14171649-r626683710-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-            # link en español: https://www.tripadvisor.es/Restaurant_Review-g187499-d14171649-Reviews-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-
-#The staff was friendly and attentive throughout our dining experience.

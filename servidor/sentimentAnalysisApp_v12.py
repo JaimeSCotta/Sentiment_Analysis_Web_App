@@ -1,3 +1,7 @@
+
+#Funcional, mejor hasta ahora 
+#!!!!!!!!!!! Importante, TripAdvisor bloquea por bot !!!!!!!!!!!!!!!!! 
+
 import logging
 import asyncio
 from fastapi import FastAPI, Depends, HTTPException, Request
@@ -9,6 +13,7 @@ import random
 from fastapi.middleware.cors import CORSMiddleware
 from database_v2 import SqliteDatabaseManager
 from fastapi.responses import JSONResponse
+from random import randint
 
 
 class Review(BaseModel):
@@ -236,6 +241,7 @@ async def extract_tripadvisor_reviews(page):
 async def extract_yelp_reviews(page):
     logger.info("Esperando a que aparezcan las reseñas de Yelp...")
     await page.wait_for_selector('.raw__09f24__T4Ezm', timeout=10000)
+    await asyncio.sleep(randint(1,5))
     logger.info("Las reseñas de Yelp están disponibles. Extrayendo...")
     html = await page.inner_html('body')
     soup = BeautifulSoup(html, 'html.parser')
@@ -255,6 +261,7 @@ async def scrape_with_retry(url, opcion):
                 page = await context.new_page() 
                 await asyncio.sleep(random.uniform(1, 3))
                 logger.info(f"Navegando a la URL: {url}")
+                await asyncio.sleep(randint(1,5))
                 await page.goto(url)
                 await page.wait_for_timeout(1000)
 
@@ -433,15 +440,3 @@ async def get_project_emotions(project_name: str):
 @app.get('/')
 async def read_root():
     return {"message": "Welcome to the review sentiment analysis API"}
-
-
-# Esta ya es la mejor version que tengo, en las sucesivas se intentara añadir una opcion de idioma y mediante el uso de mas de un modelo, predecir
-# el sentimiento positivo o negativo en base al idioma
-# solucionado el bloqueo de yelp
-# se intento con theFork pero bloqueaba por bot
-
-# ejemplo para comparar opiniones tripAdv> 
-            # link en inlges: https://www.tripadvisor.com/ShowUserReviews-g187499-d14171649-r626683710-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-            # link en español: https://www.tripadvisor.es/Restaurant_Review-g187499-d14171649-Reviews-Bar_Catalunya_Kts-Girona_Province_of_Girona_Catalonia.html
-
-#The staff was friendly and attentive throughout our dining experience.

@@ -260,7 +260,7 @@ async function loadProjectEmotions(projectName) {
         }
 
         const data = await response.json();
-        console.log(data)
+        console.log("Project emotion counts:", data);
 
         if (!data.emotions) {
             throw new Error("No emotions found for the selected project in response");
@@ -363,14 +363,20 @@ function createEmotionsChart(data, projectName) {
     // Crear un contexto para el gráfico
     const ctx = canvas.getContext('2d');
 
+    // Obtener las emociones presentes en los datos
+    const emotions = Object.keys(data.emotions);
+
+    // Filtrar las emociones que están definidas en emotionColors
+    const validEmotions = emotions.filter(emotion => emotionColors.hasOwnProperty(emotion));
+
     // Obtener los datos de las emociones
     const emotionsData = {
-        labels: Object.keys(data.emotions),
+        labels: validEmotions,
         datasets: [{
             label: `${projectName} Emotions`,
-            data: Object.values(data.emotions),
-            backgroundColor: Object.keys(data.emotions).map(emotion => emotionColors[emotion].backgroundColor),
-            borderColor: Object.keys(data.emotions).map(emotion => emotionColors[emotion].borderColor),
+            data: validEmotions.map(emotion => data.emotions[emotion]),
+            backgroundColor: validEmotions.map(emotion => emotionColors[emotion].backgroundColor),
+            borderColor: validEmotions.map(emotion => emotionColors[emotion].borderColor),
             borderWidth: 1
         }]
     };
@@ -390,6 +396,7 @@ function createEmotionsChart(data, projectName) {
 }
 
 
+
 // Función para crear y actualizar el gráfico de emociones globales
 function createGlobalEmotionsChart(data) {
     // Obtener el contenedor donde se mostrará el gráfico
@@ -406,14 +413,20 @@ function createGlobalEmotionsChart(data) {
     // Crear un contexto para el gráfico
     const ctx = canvas.getContext('2d');
 
+    // Obtener las emociones presentes en los datos
+    const emotions = Object.keys(data);
+
+    // Filtrar las emociones que están definidas en emotionColors
+    const validEmotions = emotions.filter(emotion => emotionColors.hasOwnProperty(emotion));
+
     // Obtener los datos de las emociones globales
     const emotionsData = {
-        labels: Object.keys(data), // Usar las claves del objeto recibido
+        labels: validEmotions, // Usar las emociones válidas
         datasets: [{
             label: 'Global Emotions',
-            data: Object.values(data), // Usar los valores del objeto recibido
-            backgroundColor: Object.keys(data).map(emotion => emotionColors[emotion].backgroundColor),
-            borderColor: Object.keys(data).map(emotion => emotionColors[emotion].borderColor),
+            data: validEmotions.map(emotion => data[emotion]), // Usar los valores correspondientes a las emociones válidas
+            backgroundColor: validEmotions.map(emotion => emotionColors[emotion].backgroundColor),
+            borderColor: validEmotions.map(emotion => emotionColors[emotion].borderColor),
             borderWidth: 1
         }]
     };
