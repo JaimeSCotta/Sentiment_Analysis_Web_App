@@ -26,6 +26,10 @@ pip install -r requirements.txt
 
 ## Uso
 
+![Demo de la aplicación](URL_del_video_o_gif_en_GitHub)
+
+## Despliegue
+
 Sigue estos pasos para ejecutar la aplicación:
 
 1. Abra una terminal y ejecuta el servidor. En este caso, se utiliza FastAPI como backend. Ejecute el siguiente comando: `$ uvicorn sentimentAnalysisApp_v9:app`.
