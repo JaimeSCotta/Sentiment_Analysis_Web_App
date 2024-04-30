@@ -132,7 +132,7 @@ button:hover {
     width: 0%;
     height: 5px;
     background-color: #007bff;
-    transition: width 7s ease-in-out; /* Duración de ida de 7 segundos */
+    transition: width 10s ease-in-out; /* Duración de ida de 7 segundos */
     z-index: 9999; /* Asegura que la barra de carga esté por encima de todo */
 }
 
