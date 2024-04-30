@@ -20,7 +20,7 @@ const BASE_URL = "http://127.0.0.1:8000"; // IP Local
 window.addEventListener('DOMContentLoaded', function() {
     // Seleccionar el contenedor donde se añadirán las imágenes
     var container = document.querySelector('.container');
-    var numImages = 2;
+    var numImages = 1;
 
     // Iterar para añadir cada imagen al contenedor
     for (var i = 0; i < numImages; i++) {
