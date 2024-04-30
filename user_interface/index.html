@@ -1,3 +1,15 @@
+<!--
+Página Web Sentiment Aanalysis
+Autor: Jaime Sánchez Cotta
+Última actualización: 29/04/2024 
+
+Este archivo HTML constituye la estructura básica de la aplicación web "Restaurant Reviews Analysis".
+Contiene los elementos necesarios para la presentación de la interfaz de usuario, así como enlaces
+a los archivos CSS y JavaScript requeridos para el estilo y la funcionalidad de la aplicación. Además, 
+se incluyen formularios para la entrada de datos y secciones para mostrar resultados y gráficos de análisis.
+-->
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -57,13 +69,12 @@
                 <div id="emotionList"></div>
             </div>
         </div>
-        
-        <!-- Cuadro de texto para nuevo proyecto -->
+
+        <!-- Cuadro de texto para un nuevo proyecto -->
         <div id="newProjectTextInputContainer">
             <input type="text" id="newProjectTextInput" placeholder="New Projects name">
             <button type="submit" id="createNewProjectTextButton">Create New Project</button>
         </div>
-        
     </div>
 
     <!-- Gráfica de emociones -->
@@ -73,9 +84,6 @@
     <div id="globalEmotionsChartContainer" class="global-chart-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="scripts_v4.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
-
-
-

@@ -1,4 +1,14 @@
-/* Estilos CSS */
+/*
+Estilos CSS
+Autor: Jaime Sánchez Cotta
+Última actualización: 29/04/2024
+
+Este archivo contiene los estilos CSS utilizados para dar formato y diseño a la interfaz de usuario de la aplicación web. 
+Incluye reglas de estilo para elementos HTML como body, contenedores, formularios, botones, barras de progreso, y más. 
+Los estilos están diseñados para asegurar una apariencia coherente y atractiva.
+*/
+
+/* --------------------- Estilos generales --------------------- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-size: cover;
@@ -6,7 +16,7 @@ body {
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
-    position: relative; /* Asegura que las imágenes superpuestas se posicionen correctamente */
+    position: relative;
 }
 
 .container {
@@ -16,7 +26,7 @@ body {
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    position: relative; /* Asegura que las imágenes superpuestas se posicionen correctamente */
+    position: relative;
 }
 
 h1 {
@@ -25,12 +35,15 @@ h1 {
     color: #333;
 }
 
+
+
+/* --------------------- Estilos para los formularios --------------------- */
 #rawTextInput {
     width: 96%;
-    height: 80px; /* Altura reducida */
+    height: 80px; 
     resize: vertical; /* Permite que el usuario redimensione verticalmente */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Mismo estilo de fuente */
-    font-size: 16px; /* Tamaño de fuente */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-size: 16px; 
     border: 1px solid #ccc; /* Borde */
     border-radius: 5px; /* Bordes redondeados */
     padding: 10px; /* Espaciado interno */
@@ -38,8 +51,8 @@ h1 {
 }
 
 #rawTextForm h2 {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Mismo estilo de fuente */
-    font-size: 24px; /* Tamaño de fuente */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-size: 24px; 
     color: #333; /* Color de texto */
     margin-bottom: 10px; /* Espacio inferior */
 }
@@ -47,7 +60,7 @@ h1 {
 form {
     display: flex;
     flex-direction: column;
-    position: relative; /* Asegura que la barra de carga esté posicionada correctamente */
+    position: relative;
 }
 
 input[type="text"],
@@ -71,6 +84,9 @@ button:hover {
     background-color: #0056b3;
 }
 
+
+
+/* --------------------- Estilos para la sección de resultados --------------------- */
 .resultado {
     margin-top: 20px;
     padding: 10px;
@@ -78,6 +94,9 @@ button:hover {
     border-radius: 5px;
 }
 
+
+
+/* --------------------- Estilos para las imágenes superpuestas --------------------- */
 .overlay-image {
     position: absolute;
     width: 150px; /* Tamaño de la imagen */
@@ -87,18 +106,21 @@ button:hover {
 
 .image {
     position: absolute; /* Posiciona el elemento de manera absoluta */
-    width: 150px; /* Ancho del elemento */
+    width: 150px;
     height: auto; /* Altura automática basada en el ancho */
     z-index: -1; /* Coloca el elemento detrás del contenido principal */
     left: -130px; /* Posición izquierda inicial */
     top: 250px; /* Posición superior inicial */
 }
 
+
+
+/* --------------------- Estilos para la barra de progreso --------------------- */
 #progressBarContainer {
     width: 100%;
     height: 5px; /* Altura de la barra de carga */
     background-color: #ddd; /* Color de fondo de la barra de carga */
-    position: absolute; /* Posiciona la barra de carga */
+    position: absolute;
     top: 0; /* Se coloca en la parte superior del contenedor */
     left: 0;
 }
@@ -115,14 +137,12 @@ button:hover {
 }
 
 #progressBar.reverse {
-    transition: width 0.5s ease-in-out; /* Duración de vuelta más rápida */
+    transition: width 0.5s ease-in-out; /* Duración de vuelta de la barra más rápida */
 }
 
-/* Estilo para el contenedor de selección de proyectos */
-#projectsSection {
-    margin-bottom: 30px; /* Aumentar el margen inferior */
-}
 
+
+/* --------------------- Estilos para los elementos ocultos y visibles --------------------- */
 .hidden {
     display: none;
 }
@@ -131,28 +151,38 @@ button:hover {
     display: block;
 }
 
-/* Estilos para el contenedor de la gráfica de emociones */
-.chart-container {
-    width: 300px; /* Ancho deseado */
+
+
+/* --------------------- Estilos para la sección de proyectos --------------------- */
+#projectsSection {
+    margin-bottom: 30px; /* Aumentar el margen inferior */
+}
+
+
+
+/* --------------------- Estilos para los contenedores de gráficas de emociones --------------------- */
+.chart-container,
+.global-chart-container {
+    width: 300px;
     height: auto; /* Altura automática para ajustarse al contenido */
-    position: absolute; /* Posicionamiento absoluto */
+    position: absolute;
+    border: 1px solid #ccc;
+    padding: 10px;
+    z-index: 999;
+}
+
+
+
+/* --------------------- Estilos específicos para la gráfica de emociones --------------------- */
+.chart-container {
     top: 320px; /* Desde arriba */
     right: 150px; /* Desde la derecha */
-    border: 1px solid #ccc; /* Borde */
-    padding: 10px; /* Espaciado interno */
-    z-index: 999; /* Para asegurar que esté sobre otros elementos */
 }
 
 
-/* Estilos para el contenedor de la gráfica de emociones */
+
+/* --------------------- Estilos específicos para la gráfica de emociones globales --------------------- */
 .global-chart-container {
-    width: 300px; /* Ancho deseado */
-    height: auto; /* Altura automática para ajustarse al contenido */
-    position: absolute; /* Posicionamiento absoluto */
-    top: 120px; /* Desde arriba */
-    right: 150px; /* Desde la derecha */
-    border: 1px solid #ccc; /* Borde */
-    padding: 10px; /* Espaciado interno */
-    z-index: 999; /* Para asegurar que esté sobre otros elementos */
+    top: 120px;
+    right: 150px;
 }
-

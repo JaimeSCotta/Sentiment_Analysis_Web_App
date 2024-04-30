@@ -1,7 +1,12 @@
+"""
+Archivo principal de la aplicación FastAPI para análisis de sentimientos de reseñas
+Autor: Jaime Sánchez Cotta
+Última actualización: 29/04/2024
 
-#Funcional, mejor hasta ahora 
-#!!!!!!!!!!! Importante, TripAdvisor bloquea por bot !!!!!!!!!!!!!!!!! 
+Este archivo define las rutas y funciones principales para el análisis de sentimientos de reseñas.
+"""
 
+import os
 import logging
 import asyncio
 from fastapi import FastAPI, Depends, HTTPException, Request
@@ -11,11 +16,12 @@ from transformers import pipeline
 from pydantic import BaseModel
 import random
 from fastapi.middleware.cors import CORSMiddleware
-from database_v2 import SqliteDatabaseManager
+from database import SqliteDatabaseManager
 from fastapi.responses import JSONResponse
 from random import randint
 
 
+# --------------------- Configuración inicial, definición de modelos y middleware --------------------- #
 class Review(BaseModel):
     Review: str
 
@@ -44,13 +50,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Conexión a la base de datos SQLite
-db_manager = SqliteDatabaseManager('sentiment_database_v2.db')
+db_manager = SqliteDatabaseManager('sentiment_database.db')
 
+# Modelos de NLP
 model_name = "mrcaelumn/yelp_restaurant_review_sentiment_analysis"
 sentiment_pipeline = pipeline("text-classification", model=model_name)
 classifier_pipeline = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 
+
+# --------------------- Funciones auxiliares --------------------- #
 def map_label(label):
     if label == "LABEL_2":
         return "POSITIVE"
@@ -81,7 +90,20 @@ def contar_apariciones(sentimientos):
     else:
         return "NEUTRAL"
     
-# ---------------------------------------------------------- SQL y analisis de emociones ----------------------------------------------------------- #
+# Función para capturar una imagen de la página en caso de error
+async def captura_pantalla(page, filename):
+    logger.info("Tomando captura de pantalla...")
+    current_directory = os.path.dirname(__file__)  # Obtener el directorio actual del archivo de script
+    screenshot_path = os.path.join(current_directory, filename)
+    print(screenshot_path)
+    await page.screenshot(path=screenshot_path)
+    logger.info(f"Captura de pantalla guardada como {screenshot_path}.")
+    # Cerrar la página después de tomar la captura de pantalla
+    await page.close()
+
+
+
+# --------------------- SQL y análisis de emociones --------------------- #
 def contar_apariciones_emociones(emociones):
     # Inicializar contadores
     contador_happy = 0
@@ -180,8 +202,10 @@ async def get_sentiment_counts(db_manager=Depends(get_db_manager)):
     except Exception as e:
         logger.error(f"Error al obtener recuentos de sentimiento: {e}")
         return JSONResponse(status_code=500, content={"error": "Error al obtener recuentos de sentimiento"})
-# ------------------------------------------------------------------------------------------------------------------------------------------------- #
 
+
+
+# --------------------- Funciones para el análisis de sentimientos --------------------- #
 def analyze_sentiment(review_text: str):
     logger.info(f"Texto para analizar el sentimiento: {review_text}")
     predictions = sentiment_pipeline(review_text)
@@ -215,6 +239,10 @@ async def analyze_sentiment_severalReviews(reviews: list):
     
     return overall_average_score, overall_sentiment_label
 
+
+
+# --------------------- Funciones para el raspado de información (scraping) --------------------- #
+# Funciones para extraer reseñas de diferentes sitios web
 async def extract_google_reviews(page):
     logger.info("Esperando a que aparezcan las reseñas de Google...")
     await page.wait_for_selector('.MyEned', timeout=10000)
@@ -228,7 +256,7 @@ async def extract_google_reviews(page):
 
 async def extract_tripadvisor_reviews(page):
     logger.info("Esperando a que aparezcan las reseñas de TripAdvisor...")
-    await page.screenshot(path=f"C:/Users/jaime/Desktop/Sentiment_Analysis_Web_App/screenshot1.png") ##########################################################
+    #await captura_pantalla(page, "tripAdvisor_error.png")
     await page.wait_for_selector('.JguWG', timeout=10000)
     logger.info("Las reseñas de TripAdvisor están disponibles. Extrayendo...")
     html = await page.inner_html('body')
@@ -241,7 +269,7 @@ async def extract_tripadvisor_reviews(page):
 async def extract_yelp_reviews(page):
     logger.info("Esperando a que aparezcan las reseñas de Yelp...")
     await page.wait_for_selector('.raw__09f24__T4Ezm', timeout=10000)
-    await asyncio.sleep(randint(1,5))
+    await asyncio.sleep(randint(1, 5))
     logger.info("Las reseñas de Yelp están disponibles. Extrayendo...")
     html = await page.inner_html('body')
     soup = BeautifulSoup(html, 'html.parser')
@@ -293,9 +321,13 @@ async def scrape_with_retry(url, opcion):
         except Exception as e:
             logger.error(f"Error en el intento {attempt + 1}: {e}")
             attempt += 1
+            if attempt == 3:  # Si es el tercer intento, captura la pantalla
+                await captura_pantalla(page, "error_screenshot.png")
             logger.info(f"Reintentando en {1.5 ** attempt} segundos...")
             await asyncio.sleep(1.5 ** attempt)  # Backoff exponencial
     raise Exception("The extraction could not be completed after several attempts.")
+
+
 
 async def validate_url_and_option(url, opcion):
     logger.info(f"Validando URL {url}") 
@@ -317,6 +349,8 @@ async def validate_url_and_option(url, opcion):
         raise ValueError("Invalid option. It must be GoogleReview, TripAdvisor, or Yelp.")
 
 
+
+# --------------------- Funciones principales del análisis de sentimientos --------------------- #
 @app.post("/predict_reviews_from_raw_text")
 def predict_reviews_raw(item: Review, project_name: ProjectName, db_manager=Depends(get_db_manager)):
     logger.info(f"Recibida solicitud para procesar texto crudo: {item.Review}") 
@@ -389,14 +423,13 @@ async def predict_reviews_url(url: Url, opcion: OpcionEnum, project_name: Projec
     except Exception as e:
         logger.error(f"Error durante el scraping: {e}")
         return JSONResponse(content={"error": str(e)}, headers={"Content-Type": "application/json; charset=utf-8"})
-    
-# ---------------------------------------------------------- Workspace y proyectos ----------------------------------------------------------- #
 
+
+
+# --------------------- Workspace y proyectos --------------------- #
+# Crear un nuevo proyecto en el workspace.
 @app.post("/workspace/projects")
 async def create_project(request: Request):
-    """
-    Crea un nuevo proyecto en el workspace.
-    """
     data = await request.json()
     project_name = data.get('project_name')
     if not project_name:
@@ -409,20 +442,18 @@ async def create_project(request: Request):
         else:
             raise HTTPException(status_code=400, detail="El proyecto ya existe")
 
+
+# Obtener información sobre los proyectos existentes en el workspace.
 @app.get("/workspace/projects")
 async def get_projects():
-    """
-    Obtiene información sobre los proyectos existentes en el workspace.
-    """
     with db_manager:
         projects = db_manager.get_projects()
         return {"projects": projects}
 
+
+# Obtener información sobre las emociones asociadas a un proyecto específico en el workspace.
 @app.get("/workspace/projects/{project_name}/emotions")
 async def get_project_emotions(project_name: str):
-    """
-    Obtiene información sobre las emociones asociadas a un proyecto específico en el workspace.
-    """
     try:
         with db_manager:
             emotions = db_manager.get_emotion_counts_for_project(project_name)
@@ -435,8 +466,9 @@ async def get_project_emotions(project_name: str):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"Error al obtener emociones del proyecto '{project_name}': {e}"})
 
-# ------------------------------------------------------------------------------------------------------------------------------------------------- #
 
+
+# ----------------------------------------------------------------- #
 @app.get('/')
 async def read_root():
     return {"message": "Welcome to the review sentiment analysis API"}
