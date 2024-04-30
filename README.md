@@ -26,7 +26,12 @@ pip install -r requirements.txt
 
 ## Uso
 
+Análisis de un texto en bruto:
 ![Demo de la aplicación](media/analize_raw_text.gif)
+
+Cambio y creación de projectos:
+![Demo de la aplicación](media/project_change_and_creation.gif)
+
 
 ## Despliegue
 
