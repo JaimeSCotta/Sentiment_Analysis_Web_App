@@ -35,7 +35,7 @@ window.addEventListener('DOMContentLoaded', function() {
             img.alt = "Imagen ejemplo google maps"; // Texto alternativo para accesibilidad
         } else {
             img.style.right = '-100px'; // Lado derecho
-            img.alt = "Imagen reseña 4 estrellas"; 
+            img.alt = "Imagen reseña 4 estrellas";
         }
     }
 });
