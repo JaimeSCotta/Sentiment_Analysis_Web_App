@@ -12,6 +12,12 @@ Antes de ejecutar la aplicación, asegúrate de tener instaladas las siguientes 
 - **Transformers**: Proporciona acceso a modelos preentrenados de NLP. Instálese usando `pip install transformers`.
 - **Pydantic**: Una biblioteca para validación de datos en Python. Instálese usando `pip install pydantic`.
 
+Para instalar las dependencias de Python de manera sencilla, utilice el archivo facilitado `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Uso
 
 Sigue estos pasos para ejecutar la aplicación:
