@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ## Uso
 
-![Demo de la aplicación](URL_del_video_o_gif_en_GitHub)
+![Demo de la aplicación](media/analize_raw_text.gif)
 
 ## Despliegue
 
