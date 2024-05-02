@@ -10,7 +10,7 @@ Con esta aplicación, los usuarios pueden comprender mejor el sentimiento y la e
 
 ## Requisitos Previos
 
-Antes de ejecutar la aplicación, asegúrate de tener instaladas las siguientes dependencias:
+Antes de ejecutar la aplicación, asegúrese de tener instaladas las siguientes dependencias:
 
 - **FastAPI**: La principal biblioteca para construir APIs web con Python. Instálese usando `pip install fastapi uvicorn`.
 - **Playwright**: Utilizado para automatización del navegador. Instálese usando `pip install playwright`.
