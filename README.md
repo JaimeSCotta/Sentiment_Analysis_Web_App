@@ -24,6 +24,19 @@ Para instalar las dependencias de Python de manera sencilla, utilice el archivo 
 pip install -r requirements.txt
 ```
 
+## Despliegue
+
+Sigue los siguientes pasos para ejecutar la aplicación:
+
+1. Acceda a la terminal del servidor donde planea alojar la herramienta y ejecute el siguiente comando para iniciar el servidor. En este caso, se utiliza FastAPI como backend.
+   ```bash
+   uvicorn sentimentAnalysisApp:app
+   ```
+  
+2. Seguidamente, en otra terminal de su servidor, ejecute el frontend. Asegúrese de mantener la estructura de carpetas tal como se presenta en este repositorio; de lo contrario, el sistema podría experimentar fallos.
+
+3. Una vez que tanto el servidor como el cliente estén en funcionamiento, navege a las URL proporcionadas por la terminal, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
+
 ## Uso
 
 Análisis de un texto en bruto:
@@ -32,17 +45,8 @@ Análisis de un texto en bruto:
 Cambio y creación de projectos:
 ![Demo de la aplicación](media/project_change_and_creation.gif)
 
-
-## Despliegue
-
-Sigue estos pasos para ejecutar la aplicación:
-
-1. Abra una terminal y ejecuta el servidor. En este caso, se utiliza FastAPI como backend. Ejecute el siguiente comando: `$ uvicorn sentimentAnalysisApp_v9:app`.
-2. Si se está utilizando Visual Studio Code como entorno de desarrollo, descarge la extensión Live Server. Puede abrir el archivo `index.html` con este servidor.
-3. Una vez que tanto el cliente como el servidor estén en funcionamiento, navege a las URL locales, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
-
 ## Copmentarios
 
-Para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
+Si quiere revisar el servidor, para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
 
 
