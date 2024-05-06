@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import SqliteDatabaseManager
 from fastapi.responses import JSONResponse
 from random import randint
+from fastapi.staticfiles import StaticFiles
 
 
 # --------------------- Configuración inicial, definición de modelos y middleware --------------------- #
@@ -35,6 +36,7 @@ class OpcionEnum(BaseModel):
     OpcionEnum: str
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="user_interface"), name="static")
 
 # Configuración de CORS
 app.add_middleware(
