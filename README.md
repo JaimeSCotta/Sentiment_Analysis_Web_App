@@ -69,6 +69,19 @@ Sigue los siguientes pasos para ejecutar la aplicación:
 
 3. Una vez que tanto el servidor como el cliente estén en funcionamiento, navege a las URL proporcionadas por la terminal, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
 
+## Despliegue
+
+Sigue los siguientes pasos para ejecutar la aplicación:
+
+1. Acceda a la terminal del servidor donde planea alojar la herramienta y ejecute el siguiente comando para iniciar el servidor. En este caso, se utiliza FastAPI como backend.
+   ```bash
+   uvicorn sentimentAnalysisApp:app
+   ```
+  
+2. Seguidamente, en otra terminal de su servidor, ejecute el frontend. Asegúrese de mantener la estructura de carpetas tal como se presenta en este repositorio; de lo contrario, el sistema podría experimentar fallos.
+
+3. Una vez que tanto el servidor como el cliente estén en funcionamiento, navege a las URL proporcionadas por la terminal, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
+
 ## Uso
 
 Análisis de un texto en bruto:
@@ -80,5 +93,6 @@ Cambio y creación de projectos:
 ## Copmentarios
 
 Si quiere revisar el servidor en local, para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
+
 
 
