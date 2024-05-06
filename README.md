@@ -42,10 +42,12 @@ Sigue los siguientes pasos para ejecutar la aplicación:
    ```bash
    uvicorn sentimentAnalysisApp:app
    ```
+   Observese que se tiene como respuesta algo similar a:
+   ![ejecucion uvicorn main:app](media/uvicorn.png)
   
-2. Seguidamente, en otra terminal de su servidor, ejecute el frontend. Utilice la herramienta que estime oportuna, para este caso, se hará uso de Liver Server. Instalese la extensión y sobre el archivo `index.html` seleccione la opción "open with Live Server" Asegúrese de mantener la estructura de carpetas tal como se presenta en este repositorio; de lo contrario, el sistema podría experimentar fallos. 
+3. Seguidamente, en otra terminal de su servidor, ejecute el frontend. Utilice la herramienta que estime oportuna, para este caso, se hará uso de Liver Server. Instalese la extensión y sobre el archivo `index.html` seleccione la opción "open with Live Server" Asegúrese de mantener la estructura de carpetas tal como se presenta en este repositorio; de lo contrario, el sistema podría experimentar fallos. Otra posible forma de acceder al frontend sería navegando a la ruta de los documentos estáticos de fastAPI, siendo `http://127.0.0.1:8000/static/index.html` en este caso.
 
-3. Una vez que tanto el servidor como el cliente estén en funcionamiento, navege a las URL proporcionadas por la terminal, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
+4. Una vez que tanto el servidor como el cliente estén en funcionamiento, navege a las URL proporcionadas por la terminal, típicamente `http://127.0.0.1:8000/` para FastAPI y `http://127.0.0.1:5500/` para Live Server.
 
 ## Uso
 
