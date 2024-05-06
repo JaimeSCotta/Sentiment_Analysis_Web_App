@@ -23,30 +23,8 @@ Para instalar las dependencias de Python de manera sencilla, utilice el archivo 
 ```bash
 pip install -r requirements.txt
 ```
-## Despliegue en Heroku
+## Despliegue en servidor Pub Int
 
-1. Crea una cuenta en Heroku: Si aún no tienes una cuenta en Heroku, regístrate en Heroku de forma gratuita.
-2. Instala la CLI de Heroku: Descarga e instala la Heroku Command Line Interface (CLI) en tu sistema.
-3. Inicia sesión en Heroku: Abre la terminal y ejecuta el siguiente comando para iniciar sesión en Heroku:
-```bash
-heroku login
-```
-4. Prepara tu aplicación para Heroku:
-Asegúrate de que tu aplicación tenga un archivo Procfile en el directorio raíz que especifique cómo ejecutar tu servidor FastAPI. Por ejemplo:
-```bash
-web: uvicorn server.sentimentAnalysisApp:app --host=0.0.0.0 --port=$PORT
-```
-Si tu aplicación requiere variables de entorno, como claves de API o configuraciones específicas, asegúrate de configurarlas en Heroku también.
-5. Inicializa un repositorio Git: Si aún no lo has hecho, inicializa un repositorio Git en tu proyecto y haz tu primer commit.
-6. Crea una aplicación en Heroku: Desde la terminal, ejecuta el siguiente comando para crear una nueva aplicación en Heroku:
-```bash
-heroku create nombre-de-tu-aplicacion
-```
-8. Despliega tu aplicación: Utiliza Git para desplegar tu aplicación en Heroku:
-   ```bash
-   git push heroku master
-   ```
-9. Verifica el despliegue: Una vez completado el despliegue, Heroku te proporcionará una URL donde estará disponible tu aplicación. Abre esta URL en tu navegador web para verificar que la aplicación se haya desplegado correctamente.
 
 ## Despliegue en local
 
