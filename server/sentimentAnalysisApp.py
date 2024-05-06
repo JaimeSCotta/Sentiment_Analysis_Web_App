@@ -36,7 +36,10 @@ class OpcionEnum(BaseModel):
     OpcionEnum: str
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="user_interface"), name="static")
+
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "user_interface")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 
 # Configuración de CORS
 app.add_middleware(
