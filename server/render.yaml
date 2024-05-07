@@ -2,7 +2,7 @@ services:
   - name: Sentiment-Analysis-Web-App
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn sentimentAnalysisApp:app --host 0.0.0.0 --port 8080
+    startCommand: uvicorn sentimentAnalysisApp:app --host 0.0.0.0 --port 4000
     env:
       - key: PORT
-        value: 8080
+        value: 4000
