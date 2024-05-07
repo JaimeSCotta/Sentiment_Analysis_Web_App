@@ -1,7 +1,7 @@
 /*
 Estilos CSS
 Autor: Jaime Sánchez Cotta
-Última actualización: 29/04/2024
+Última actualización: 07/05/2024
 
 Este archivo contiene los estilos CSS utilizados para dar formato y diseño a la interfaz de usuario de la aplicación web. 
 Incluye reglas de estilo para elementos HTML como body, contenedores, formularios, botones, barras de progreso, y más. 
@@ -132,7 +132,7 @@ button:hover {
     width: 0%;
     height: 5px;
     background-color: #007bff;
-    transition: width 10s ease-in-out; /* Duración de ida de 7 segundos */
+    transition: width 10s ease-in-out; /* Duración de ida de 10 segundos */
     z-index: 9999; /* Asegura que la barra de carga esté por encima de todo */
 }
 

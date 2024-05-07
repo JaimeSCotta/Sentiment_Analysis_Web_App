@@ -1,12 +1,12 @@
 /*
 Aplicación JavaScript
 Autor: Jaime Sánchez Cotta
-Última actualización: 30/04/2024
+Última actualización: 07/05/2024
 
 Este archivo contiene el código JavaScript necesario para el funcionamiento de la aplicación web. 
 Se encarga de manejar la lógica del lado del cliente, incluyendo la interacción con el DOM, 
 la comunicación con el servidor a través de solicitudes HTTP, y el procesamiento de datos para su visualización en la interfaz de usuario.
-El código se divide en secciones claramente identificadas, comenzando con el manejo dinámico de imágenes 
+El código se divide en secciones, comenzando con el manejo dinámico de imágenes 
 y continuando con la gestión de formularios para la entrada de URL y texto sin formato (raw). 
 Además, se incluyen funciones para cargar proyectos, manejar la creación de nuevos proyectos, y visualizar gráficos de emociones asociadas a los proyectos seleccionados.
 */
