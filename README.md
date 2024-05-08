@@ -60,6 +60,7 @@ Cambio y creación de projectos:
 ## Copmentarios
 
 Si quiere revisar el servidor en local, para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
+Mencionar también que la opción de analizar reseñas de TripAdvisor esta desabilitada y se desaconseja su uso.
 
 
 
