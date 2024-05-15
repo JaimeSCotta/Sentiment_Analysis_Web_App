@@ -24,7 +24,7 @@ Para instalar las dependencias de Python de manera sencilla, utilice el archivo 
 pip install -r requirements.txt
 ```
 
-En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Python 3.9**, tiene dos opciones de descarga, mediante la tienda de Microsoft, o a través de la url: `https://www.python.org/downloads/release/python-390/`
+En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Python 3.9**, tiene dos opciones de descarga, mediante la tienda de Microsoft, o a través de la url: `https://www.python.org/downloads/release/python-390/`Recuerde editar las variables de entorno.
 
 ## Despliegue en servidor Pub Int
 
