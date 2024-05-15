@@ -23,6 +23,9 @@ Para instalar las dependencias de Python de manera sencilla, utilice el archivo 
 ```bash
 pip install -r requirements.txt
 ```
+
+En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Python**, navegue a la url: `https://www.python.org/downloads/`
+
 ## Despliegue en servidor Pub Int
 
 
