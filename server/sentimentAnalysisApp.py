@@ -44,11 +44,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",  # Dirección local
-        "http://138.100.154.10:13015",  # Dirección remota
-        "http://cloud-gisai.etsisi.upm.es:13015"  # Dirección remota con DNS
-    ],
+    allow_origins=["*"],  # Permitir acceso desde cualquier origen
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
