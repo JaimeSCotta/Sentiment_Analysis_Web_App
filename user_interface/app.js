@@ -1,7 +1,7 @@
 /*
 Aplicación JavaScript
 Autor: Jaime Sánchez Cotta
-Última actualización: 07/05/2024
+Última actualización: 10/06/2024
 
 Este archivo contiene el código JavaScript necesario para el funcionamiento de la aplicación web. 
 Se encarga de manejar la lógica del lado del cliente, incluyendo la interacción con el DOM, 
@@ -13,7 +13,8 @@ Además, se incluyen funciones para cargar proyectos, manejar la creación de nu
 
 
 // Definir la dirección base
-const BASE_URL = "http://127.0.0.1:8000"; // IP Local
+//const BASE_URL = "http://127.0.0.1:8000"; // IP Local
+const BASE_URL = window.location.origin;
 
 
 // --------------------- Código para añadir imágenes dinámicas --------------------- //

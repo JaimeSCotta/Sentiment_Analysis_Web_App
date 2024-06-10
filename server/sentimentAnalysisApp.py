@@ -1,7 +1,7 @@
 """
 Archivo principal de la aplicación FastAPI para análisis de sentimientos de reseñas
 Autor: Jaime Sánchez Cotta
-Última actualización: 07/05/2024
+Última actualización: 10/06/2024
 
 Este archivo define las rutas y funciones principales para el análisis de sentimientos de reseñas.
 """
@@ -44,7 +44,11 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"], # Especificar el puerto donde se premiten solicitudes, en caso de que no se utilice el fichero estático
+    allow_origins=[
+        "http://127.0.0.1:5500",  # Dirección local
+        "http://138.100.154.10:13015",  # Dirección remota
+        "http://cloud-gisai.etsisi.upm.es:13015"  # Dirección remota con DNS
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
