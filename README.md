@@ -28,7 +28,7 @@ En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Pyt
 
 ## Despliegue en servidor Pubúblico de Internet
 
-Para este ejemplo, se ha habilitado la conexión de la aplicación web a traves dirección:
+Para este ejemplo, se ha habilitado la conexión de la aplicación web a traves de la dirección:
 
 ```bash
 http://138.100.154.10:13015
