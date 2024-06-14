@@ -24,9 +24,24 @@ Para instalar las dependencias de Python de manera sencilla, utilice el archivo 
 pip install -r requirements.txt
 ```
 
-En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Python 3.9**, tiene dos opciones de descarga, mediante la tienda de Microsoft, o a través de la url: `https://www.python.org/downloads/release/python-390/`Recuerde editar las variables de entorno.
+En caso de que tenga un sistema operativo de Windows, y no tenga instalado **Python 3.9**, tiene dos opciones de descarga, mediante la tienda de Microsoft, o a través de la url: `https://www.python.org/downloads/release/python-390/`. Recuerde editar las variables de entorno.
 
-## Despliegue en servidor Pub Int
+## Despliegue en servidor Pubúblico de Internet
+
+Para este ejemplo, se ha habilitado la conexión de la aplicación web a traves dirección:
+
+```bash
+http://138.100.154.10:13015
+```
+O bien `http://cloud-gisai.etsisi.upm.es:13015`. Esto ha sido posible mapeando el puerto `13015` contra el puerto local de la máquina `8000`.  Del mismo modo, fue necesaria la creación de una nueva regla que permitiese el tráfico en los puertos habilitados para ello. Para inicializar la aplicación se ejecuto en la máquina servidor:
+
+```bash
+uvicorn sentimentAnalysisApp:app --host 0.0.0.0 --port 8000
+```
+
+Ejecución de la aplicación en ambos puertos como se muestra a continuación:
+
+![ejecucion en servidor público de internet](media/servidor_publico_internet.gif)
 
 
 ## Despliegue en local
@@ -60,7 +75,7 @@ Análisis de un texto en bruto:
 Cambio y creación de projectos:
 ![Demo de la aplicación](media/project_change_and_creation.gif)
 
-## Copmentarios
+## Comentarios
 
 Si quiere revisar el servidor en local, para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
 Mencionar también que la opción de analizar reseñas de TripAdvisor esta desabilitada y se desaconseja su uso.
