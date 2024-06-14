@@ -80,5 +80,9 @@ Cambio y creación de projectos:
 Si quiere revisar el servidor en local, para acceder a FastAPI se debe incluir en la URL /docs es decir `http://127.0.0.1:8000/docs`.
 Mencionar también que la opción de analizar reseñas de TripAdvisor esta desabilitada y se desaconseja su uso.
 
+Ultima modificación del proyecto 06/2024. Para el mantenimiento del código, sería necesario revisar que la base de datos funcione correctamente (archivo [Database](server/sentiment_database.db)). Del mismo modo, en caso de que dejen de funcionar las consultas mediante la opción de URL, sería necesario revisar el archivo [backend](server/sentimentAnalysisApp.py), en concreto las líneas de código donde se realiza la extracción de reseñas (líneas `soup.select()`).
+
+El código proporcionado ([Database](server/sentiment_database.db)) maneja correctamente las entradas del usuario utilizando consultas preparadas con placeholders `?`, evitando así ataques mediante SQL injection.
+
 
 
