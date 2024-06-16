@@ -39,6 +39,8 @@ O bien `http://cloud-gisai.etsisi.upm.es:13015`. Esto ha sido posible mapeando e
 uvicorn sentimentAnalysisApp:app --host 0.0.0.0 --port 8000
 ```
 
+> **Nota:** Para acceder a la interfaz web, se ha de incluir al final de la IP `static/index.html` (http://138.100.154.10:13015/static/index.html)
+> 
 Ejecución de la aplicación en ambos puertos como se muestra a continuación:
 
 ![ejecucion en servidor público de internet](media/servidor_publico_internet.gif)
