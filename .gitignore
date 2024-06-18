@@ -1,0 +1,7 @@
+# Ignorar archivos y carpetas en el directorio server
+/server/.vscode/
+/server/__pycache__/
+
+# Ignorar archivos y carpetas en el directorio user_interface
+/user_interface/.vscode/
+/user_interface/__pycache__/
