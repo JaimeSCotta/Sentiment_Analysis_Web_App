@@ -1,7 +1,7 @@
 /*
 Aplicación JavaScript
 Autor: Jaime Sánchez Cotta
-Última actualización: 10/06/2024
+Última actualización: 18/06/2024
 
 Este archivo contiene el código JavaScript necesario para el funcionamiento de la aplicación web. 
 Se encarga de manejar la lógica del lado del cliente, incluyendo la interacción con el DOM, 
@@ -16,31 +16,10 @@ Además, se incluyen funciones para cargar proyectos, manejar la creación de nu
 //const BASE_URL = "http://127.0.0.1:8000"; // IP Local
 const BASE_URL = window.location.origin;
 
-
-// --------------------- Código para añadir imágenes dinámicas --------------------- //
-window.addEventListener('DOMContentLoaded', function() {
-    // Seleccionar el contenedor donde se añadirán las imágenes
-    var container = document.querySelector('.container');
-    var numImages = 1;
-
-    // Iterar para añadir cada imagen al contenedor
-    for (var i = 0; i < numImages; i++) {
-        var img = document.createElement('img');
-        img.src = 'image' + (i + 1) + '.png';
-        img.classList.add('overlay-image');
-        container.appendChild(img);
-
-        // Posicionar las imágenes en el lado izquierdo y derecho alternativamente
-        if (i % 2 === 0) {
-            img.style.left = '-100px'; // Lado izquierdo
-            img.alt = "Imagen ejemplo google maps"; // Texto alternativo para accesibilidad
-        } else {
-            img.style.right = '-100px'; // Lado derecho
-            img.alt = "Imagen reseña 4 estrellas";
-        }
-    }
-});
-
+// Declaración global de variables para no volver a consultar la emocion previa
+let lastEmotionsData = null;
+let lastProjectName = '';
+let lastGlobalEmotionsData = null;
 
 
  // --------------------- Código para el formulario de URL --------------------- //
@@ -236,6 +215,7 @@ async function loadProjects() {
 // Cargar proyectos existentes al cargar la página
 window.addEventListener('DOMContentLoaded', async function() {
     await loadProjects();
+    await loadGlobalProjectEmotions();
 });
 
 // Código para manejar la creación de un nuevo proyecto desde el cuadro de texto
@@ -311,6 +291,10 @@ async function loadProjectEmotions(projectName) {
             throw new Error("No emotions found for the selected project in response");
         }
 
+        // Actualizar las variables globales
+        lastEmotionsData = data;
+        lastProjectName = projectName;
+
         // Crear una lista para mostrar las emociones
         const emotionsList = document.createElement("ul");
         emotionsList.classList.add("emotions-list");
@@ -334,8 +318,16 @@ async function loadProjectEmotions(projectName) {
     }
 }
 
+
 // Cargar las emociones asociadas al proyecto seleccionado al cambiar la selección
 document.getElementById("projectSelect").addEventListener("change", async function(event) {
+    // Limpiar el campo de URL y texto raw
+    document.getElementById('urlInput').value = '';
+    document.getElementById('rawTextInput').value = '';
+    // Además, ocultar los resultados si están visibles
+    document.getElementById('resultado').innerHTML = '';
+    document.getElementById('rawTextResultado').innerHTML = '';
+
     const projectName = event.target.value;
     console.log("Valor de projectName:", projectName);
     // Cargar las emociones asociadas al proyecto seleccionado
@@ -361,6 +353,9 @@ async function loadGlobalProjectEmotions() {
         const data = await response.json();
         console.log("Global emotion counts:", data);
 
+        // Actualizar la variable global de emociones globales
+        lastGlobalEmotionsData = data;
+
         // Llamar a la función para crear y actualizar el gráfico de emociones globales
         createGlobalEmotionsChart(data);
 
@@ -369,11 +364,6 @@ async function loadGlobalProjectEmotions() {
         alert("Error al cargar los recuentos de sentimiento. Por favor, inténtelo de nuevo.");
     }
 }
-
-// Llamar a la función para cargar los recuentos de sentimiento al cargar la página
-window.addEventListener('DOMContentLoaded', async function() {
-    await loadGlobalProjectEmotions();
-});
 
 
 
@@ -394,6 +384,7 @@ const emotionColors = {
     },
     // Agregar más emociones aquí si es necesario
 };
+
 
 // Función para crear y actualizar la gráfica de emociones
 function createEmotionsChart(data, projectName) {
@@ -441,6 +432,9 @@ function createEmotionsChart(data, projectName) {
             }
         }
     });
+
+    // Retornar el objeto Chart para poder actualizarlo posteriormente si es necesario
+    return emotionsChart;
 }
 
 // Función para crear y actualizar el gráfico de emociones globales
@@ -479,4 +473,20 @@ function createGlobalEmotionsChart(data) {
             }
         }
     });
+
+    // Retornar el objeto Chart para poder actualizarlo posteriormente si es necesario
+    return globalEmotionsChart;
 }
+
+function handleResize() {
+    if (lastEmotionsData && lastProjectName) {
+        createEmotionsChart(lastEmotionsData, lastProjectName);
+    }
+
+    if (lastGlobalEmotionsData) {
+        createGlobalEmotionsChart(lastGlobalEmotionsData);
+    }
+}
+
+// Agregar un event listener al evento de redimensionamiento de la ventana
+window.addEventListener('resize', handleResize);

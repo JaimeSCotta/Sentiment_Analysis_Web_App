@@ -1,7 +1,7 @@
 /*
 Estilos CSS
 Autor: Jaime Sánchez Cotta
-Última actualización: 07/05/2024
+Última actualización: 18/06/2024
 
 Este archivo contiene los estilos CSS utilizados para dar formato y diseño a la interfaz de usuario de la aplicación web. 
 Incluye reglas de estilo para elementos HTML como body, contenedores, formularios, botones, barras de progreso, y más. 
@@ -20,13 +20,12 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    position: relative;
 }
 
 h1 {
@@ -35,15 +34,13 @@ h1 {
     color: #333;
 }
 
-
-
 /* --------------------- Estilos para los formularios --------------------- */
 #rawTextInput {
     width: 96%;
-    height: 80px; 
+    height: 80px;
     resize: vertical; /* Permite que el usuario redimensione verticalmente */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    font-size: 16px; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
     border: 1px solid #ccc; /* Borde */
     border-radius: 5px; /* Bordes redondeados */
     padding: 10px; /* Espaciado interno */
@@ -51,8 +48,8 @@ h1 {
 }
 
 #rawTextForm h2 {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    font-size: 24px; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 24px;
     color: #333; /* Color de texto */
     margin-bottom: 10px; /* Espacio inferior */
 }
@@ -84,8 +81,6 @@ button:hover {
     background-color: #0056b3;
 }
 
-
-
 /* --------------------- Estilos para la sección de resultados --------------------- */
 .resultado {
     margin-top: 20px;
@@ -93,8 +88,6 @@ button:hover {
     background-color: rgba(240, 240, 240, 0.9);
     border-radius: 5px;
 }
-
-
 
 /* --------------------- Estilos para las imágenes superpuestas --------------------- */
 .overlay-image {
@@ -113,17 +106,31 @@ button:hover {
     top: 250px; /* Posición superior inicial */
 }
 
+.image2 {
+    position: absolute; 
+    width: 150px;
+    height: auto; 
+    z-index: -1; 
+    left: -130px; 
+    top: 700px; 
+}
 
+/* Asegúrate de que las imagenes se posicionan correctamente */
+@media (min-width: 576px) {
+    .col-sm-12.order-sm-1 {
+        position: relative; /* Ajusta el posicionamiento para pantallas pequeñas */
+    }
+}
 
 /* --------------------- Estilos para la barra de progreso --------------------- */
 #progressBarContainer {
-    width: 100%;
-    height: 5px; /* Altura de la barra de carga */
-    background-color: #ddd; /* Color de fondo de la barra de carga */
     position: absolute;
-    top: 0; /* Se coloca en la parte superior del contenedor */
-    left: 0;
+    width: calc(100% - 20px); /* Ajusta el ancho restando el margen deseado */
+    z-index: 100; /* Asegura que esté encima del contenido */
+    top: 0; /* Ajusta la posición vertical */
+    margin-right: 0; /* Asegura que no haya margen derecho innecesario */
 }
+
 
 #progressBar {
     position: absolute;
@@ -132,15 +139,13 @@ button:hover {
     width: 0%;
     height: 5px;
     background-color: #007bff;
-    transition: width 10s ease-in-out; /* Duración de ida de 10 segundos */
+    transition: width 15s ease-in-out; /* Duración de ida de 15 segundos */
     z-index: 9999; /* Asegura que la barra de carga esté por encima de todo */
 }
 
 #progressBar.reverse {
-    transition: width 0.5s ease-in-out; /* Duración de vuelta de la barra más rápida */
+    transition: width 0.9s ease-in-out; /* Duración de vuelta de la barra más rápida */
 }
-
-
 
 /* --------------------- Estilos para los elementos ocultos y visibles --------------------- */
 .hidden {
@@ -151,38 +156,49 @@ button:hover {
     display: block;
 }
 
-
-
-/* --------------------- Estilos para la sección de proyectos --------------------- */
+/* --------------------- Estilos para la sección de proyectos y graficas --------------------- */
 #projectsSection {
     margin-bottom: 30px; /* Aumentar el margen inferior */
 }
 
-
-
-/* --------------------- Estilos para los contenedores de gráficas de emociones --------------------- */
-.chart-container,
-.global-chart-container {
-    width: 300px;
+/* Estilos específicos para la gráfica de emociones */
+.chart-container {
+    width: 100%;
     height: auto; /* Altura automática para ajustarse al contenido */
-    position: absolute;
     border: 1px solid #ccc;
     padding: 10px;
-    z-index: 999;
+    margin-bottom: 20px; /* Espacio inferior para separar gráficas */
 }
 
-
-
-/* --------------------- Estilos específicos para la gráfica de emociones --------------------- */
-.chart-container {
-    top: 320px; /* Desde arriba */
-    right: 150px; /* Desde la derecha */
-}
-
-
-
-/* --------------------- Estilos específicos para la gráfica de emociones globales --------------------- */
+/* Estilos específicos para la gráfica de emociones globales */
 .global-chart-container {
-    top: 120px;
-    right: 150px;
+    width: 100%;
+    height: auto; /* Altura automática para ajustarse al contenido */
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px; /* Espacio inferior para separar gráficas */
 }
+
+/* Asegúrate de que las graficas se redimensionan ocupen todo el espacio posible */
+@media (max-width: 767px) {
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .order-1 {
+        order: 1 !important;
+    }
+
+    .order-2 {
+        order: 2 !important;
+    }
+}
+
+/* Asegúrate de que el canvas ocupe todo el espacio disponible */
+#projectEmotionsChart canvas, #globalEmotionsChart canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
