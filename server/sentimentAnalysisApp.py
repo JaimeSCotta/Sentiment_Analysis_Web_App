@@ -1,7 +1,7 @@
 """
 Archivo principal de la aplicación FastAPI para análisis de sentimientos de reseñas
 Autor: Jaime Sánchez Cotta
-Última actualización: 10/06/2024
+Última actualización: 25/06/2024
 
 Este archivo define las rutas y funciones principales para el análisis de sentimientos de reseñas.
 """
@@ -96,15 +96,10 @@ def contar_apariciones(sentimientos):
         return "NEUTRAL"
     
 # Función para capturar una imagen de la página en caso de error
-async def captura_pantalla(page, filename):
-    logger.info("Tomando captura de pantalla...")
-    current_directory = os.path.dirname(__file__)  # Obtener el directorio actual del archivo de script
-    screenshot_path = os.path.join(current_directory, filename)
-    print(screenshot_path)
+async def captura_pantalla(page):
+    screenshot_path = f"screenshot_attempt_error.png"
     await page.screenshot(path=screenshot_path)
-    logger.info(f"Captura de pantalla guardada como {screenshot_path}.")
-    # Cerrar la página después de tomar la captura de pantalla
-    await page.close()
+    logger.info(f"Captura de pantalla guardada en {screenshot_path}")
 
 
 
@@ -249,39 +244,54 @@ async def analyze_sentiment_severalReviews(reviews: list):
 # --------------------- Funciones para el raspado de información (scraping) --------------------- #
 # Funciones para extraer reseñas de diferentes sitios web
 async def extract_google_reviews(page):
-    logger.info("Esperando a que aparezcan las reseñas de Google...")
-    await page.wait_for_selector('.MyEned', timeout=10000)
-    logger.info("Las reseñas de Google están disponibles. Extrayendo...")
-    html = await page.inner_html('body')
-    soup = BeautifulSoup(html, 'html.parser')
-    review_elements = soup.select('.MyEned')
-    reviews_text = [review.text.strip() for review in review_elements]
-    logger.info(f"Se han extraído {len(reviews_text)} reseñas de Google.")
-    return reviews_text
+    try:
+        logger.info("Esperando a que aparezcan las reseñas de Google...")
+        await page.wait_for_selector('.MyEned', timeout=10000)
+        logger.info("Las reseñas de Google están disponibles. Extrayendo...")
+        html = await page.inner_html('body')
+        soup = BeautifulSoup(html, 'html.parser')
+        review_elements = soup.select('.MyEned')
+        reviews_text = [review.text.strip() for review in review_elements]
+        logger.info(f"Se han extraído {len(reviews_text)} reseñas de Google.")
+        return reviews_text
+    except Exception as e:
+        logger.error(f"Error en la extracción de Google Reviews: {e}")
+        await captura_pantalla(page)
+        raise
 
 async def extract_tripadvisor_reviews(page):
-    logger.info("Esperando a que aparezcan las reseñas de TripAdvisor...")
-    #await captura_pantalla(page, "tripAdvisor_error.png")
-    await page.wait_for_selector('.JguWG', timeout=10000)
-    logger.info("Las reseñas de TripAdvisor están disponibles. Extrayendo...")
-    html = await page.inner_html('body')
-    soup = BeautifulSoup(html, 'html.parser')
-    review_elements = soup.select('.JguWG')
-    reviews_text = [review.text.strip() for review in review_elements]
-    logger.info(f"Se han extraído {len(reviews_text)} reseñas de TripAdvisor.")
-    return reviews_text
+    try:
+        logger.info("Esperando a que aparezcan las reseñas de TripAdvisor...")
+        #await captura_pantalla(page, "tripAdvisor_error.png")
+        await page.wait_for_selector('.JguWG', timeout=10000)
+        logger.info("Las reseñas de TripAdvisor están disponibles. Extrayendo...")
+        html = await page.inner_html('body')
+        soup = BeautifulSoup(html, 'html.parser')
+        review_elements = soup.select('.JguWG')
+        reviews_text = [review.text.strip() for review in review_elements]
+        logger.info(f"Se han extraído {len(reviews_text)} reseñas de TripAdvisor.")
+        return reviews_text
+    except Exception as e:
+        logger.error(f"Error en la extracción de TripAdvisor: {e}")
+        await captura_pantalla(page, "TripAdvisor")
+        raise
 
 async def extract_yelp_reviews(page):
-    logger.info("Esperando a que aparezcan las reseñas de Yelp...")
-    await page.wait_for_selector('.raw__09f24__T4Ezm', timeout=10000)
-    await asyncio.sleep(randint(1, 5))
-    logger.info("Las reseñas de Yelp están disponibles. Extrayendo...")
-    html = await page.inner_html('body')
-    soup = BeautifulSoup(html, 'html.parser')
-    review_elements = soup.select('.raw__09f24__T4Ezm')
-    reviews_text = [review.text.strip() for review in review_elements]
-    logger.info(f"Se han extraído {len(reviews_text)} reseñas de Yelp.")
-    return reviews_text
+    try:
+        logger.info("Esperando a que aparezcan las reseñas de Yelp...")
+        await page.wait_for_selector('.comment__09f24__D0cxf.y-css-h9c2fl', timeout=10000)
+        await asyncio.sleep(randint(1, 5))
+        logger.info("Las reseñas de Yelp están disponibles. Extrayendo...")
+        html = await page.inner_html('body')
+        soup = BeautifulSoup(html, 'html.parser')
+        review_elements = soup.select('.comment__09f24__D0cxf.y-css-h9c2fl')
+        reviews_text = [review.text.strip() for review in review_elements]
+        logger.info(f"Se han extraído {len(reviews_text)} reseñas de Yelp.")
+        return reviews_text
+    except Exception as e:
+            logger.error(f"Error en la extracción de Yelp: {e}")
+            await captura_pantalla(page)
+            raise
 
 async def scrape_with_retry(url, opcion):
     attempt = 0
@@ -322,23 +332,21 @@ async def scrape_with_retry(url, opcion):
                 logger.info("Cerrando el navegador...")
                 await browser.close()
                 logger.info("Extracción completada con éxito.")
-                return reviews
+                first_review_lines = '\n'.join(reviews[:2])
+                return reviews, first_review_lines
         except Exception as e:
             logger.error(f"Error en el intento {attempt + 1}: {e}")
             attempt += 1
-            if attempt == 3:  # Si es el tercer intento, captura la pantalla
-                await captura_pantalla(page, "error_screenshot.png")
             logger.info(f"Reintentando en {1.5 ** attempt} segundos...")
             await asyncio.sleep(1.5 ** attempt)  # Backoff exponencial
     raise Exception("The extraction could not be completed after several attempts.")
-
 
 
 async def validate_url_and_option(url, opcion):
     logger.info(f"Validando URL {url}") 
     logger.info(f"Validando opcion {opcion}") 
     if opcion == "GoogleReview":
-        if "google." not in url:
+        if "google." not in url and "maps.app.goo.gl" not in url:
             logger.error(f"The provided URL does not seem to be from Google Reviews: {url}")
             raise ValueError("The provided URL does not seem to be from Google Reviews.")
     elif opcion == "TripAdvisor":
@@ -399,7 +407,7 @@ async def predict_reviews_url(url: Url, opcion: OpcionEnum, project_name: Projec
     try:
         # Realizar análisis de emociones
         await validate_url_and_option(url.Url, opcion.OpcionEnum)
-        reviews = await scrape_with_retry(url.Url, opcion.OpcionEnum)
+        reviews, first_review_lines = await scrape_with_retry(url.Url, opcion.OpcionEnum)
         overall_average_score, overall_sentiment_label = await analyze_sentiment_severalReviews(reviews)
         logger.info("Análisis de sentimiento completado.")
     
@@ -416,7 +424,8 @@ async def predict_reviews_url(url: Url, opcion: OpcionEnum, project_name: Projec
             "Analisis Label": overall_sentiment_label,  
             "Score": overall_average_score,           
             "Emotion Label": overall_emotion_label,
-            "Emotion Score": overall_emotion_score
+            "Emotion Score": overall_emotion_score,
+            "Review Text": first_review_lines
         }
         logger.info("Resultado final: %s", final_result)
 
