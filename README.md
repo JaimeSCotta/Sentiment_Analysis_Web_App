@@ -43,7 +43,7 @@ uvicorn sentimentAnalysisApp:app --host 0.0.0.0 --port 8000
 > 
 Ejecución de la aplicación en ambos puertos como se muestra a continuación:
 
-![ejecucion en servidor público de internet](media/servidor_publico_internet.gif)
+![ejecucion en servidor público de internet](media/public_server.gif)
 
 
 ## Despliegue en local
