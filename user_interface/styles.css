@@ -1,7 +1,7 @@
 /*
 Estilos CSS
 Autor: Jaime Sánchez Cotta
-Última actualización: 18/06/2024
+Última actualización: 25/06/2024
 
 Este archivo contiene los estilos CSS utilizados para dar formato y diseño a la interfaz de usuario de la aplicación web. 
 Incluye reglas de estilo para elementos HTML como body, contenedores, formularios, botones, barras de progreso, y más. 
@@ -36,7 +36,7 @@ h1 {
 
 /* --------------------- Estilos para los formularios --------------------- */
 #rawTextInput {
-    width: 96%;
+    width: 100%;
     height: 80px;
     resize: vertical; /* Permite que el usuario redimensione verticalmente */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -69,11 +69,12 @@ select {
 }
 
 button {
+    margin-top: 10px !important;
     padding: 10px;
     background-color: #007bff;
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 5px !important;
     cursor: pointer;
 }
 
@@ -83,11 +84,19 @@ button:hover {
 
 /* --------------------- Estilos para la sección de resultados --------------------- */
 .resultado {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(240, 240, 240, 0.9);
+    border-radius: 5px;
+}
+
+.review-text-container {
     margin-top: 20px;
     padding: 10px;
     background-color: rgba(240, 240, 240, 0.9);
     border-radius: 5px;
 }
+
 
 /* --------------------- Estilos para las imágenes superpuestas --------------------- */
 .overlay-image {
@@ -173,13 +182,13 @@ button:hover {
 /* Estilos específicos para la gráfica de emociones globales */
 .global-chart-container {
     width: 100%;
-    height: auto; /* Altura automática para ajustarse al contenido */
+    height: auto;
     border: 1px solid #ccc;
     padding: 10px;
-    margin-bottom: 20px; /* Espacio inferior para separar gráficas */
+    margin-bottom: 20px; 
 }
 
-/* Asegúrate de que las graficas se redimensionan ocupen todo el espacio posible */
+/* Las graficas que se redimensionan ocupen todo el espacio posible */
 @media (max-width: 767px) {
     .col-md-6 {
         flex: 0 0 100%;
@@ -195,10 +204,8 @@ button:hover {
     }
 }
 
-/* Asegúrate de que el canvas ocupe todo el espacio disponible */
+/* El canvas ocupe todo el espacio disponible */
 #projectEmotionsChart canvas, #globalEmotionsChart canvas {
     width: 100% !important;
     height: 100% !important;
 }
-
-

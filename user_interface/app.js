@@ -1,7 +1,7 @@
 /*
 Aplicación JavaScript
 Autor: Jaime Sánchez Cotta
-Última actualización: 18/06/2024
+Última actualización: 25/06/2024
 
 Este archivo contiene el código JavaScript necesario para el funcionamiento de la aplicación web. 
 Se encarga de manejar la lógica del lado del cliente, incluyendo la interacción con el DOM, 
@@ -28,6 +28,7 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
 
     // Limpiar la salida anterior
     document.getElementById("resultado").innerText = '';
+    document.getElementById("reviewTextContainer").innerText = '';
 
     // Mostrar la barra de carga
     document.getElementById("progressBar").style.width = "100%";
@@ -44,31 +45,33 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
     
     let timeoutId; // Variable para almacenar el identificador del temporizador
 
-    // Realizar una solicitud POST para predecir las reseñas desde la URL
-    const responseQ = await fetch(`${BASE_URL}/predict_reviews_from_url`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8"
-        },
-        body: JSON.stringify({
-            "url": {
-                "Url": urlInput
-            },
-            "opcion": {
-                "OpcionEnum": opcionInput
-            },
-            "project_name": {
-                "ProjectName": projectName
-            },
-        })
-    });
-
-    // Establecer el tiempo de espera para mostrar el mensaje de retrying
-    timeoutId = setTimeout(() => {
-        document.getElementById("resultado").innerText = "Something went wrong, retrying...";
-    }, 25000);
-
     try {
+        // Realizar una solicitud POST para predecir las reseñas desde la URL
+        const responseQ = fetch(`${BASE_URL}/predict_reviews_from_url`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify({
+                "url": {
+                    "Url": urlInput
+                },
+                "opcion": {
+                    "OpcionEnum": opcionInput
+                },
+                "project_name": {
+                    "ProjectName": projectName
+                },
+            })
+        });
+
+        // Establecer el tiempo de espera para mostrar el mensaje de retrying
+        timeoutId = setTimeout(() => {
+            if (!document.getElementById("reviewTextContainer").innerText) {
+                document.getElementById("reviewTextContainer").innerText = "Something went wrong, retrying...";
+            }
+        }, 25000);
+
         // Esperar la respuesta
         const response = await responseQ;
         clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes del tiempo de espera
@@ -86,15 +89,22 @@ document.getElementById("urlForm").addEventListener("submit", async function(eve
             // Construir el mensaje a mostrar
             const message = `Sentiment Label: ${data["Analisis Label"]}\nScore: ${data.Score.toFixed(4)}\nEmotion Label: ${data["Emotion Label"]}\nEmotion Score: ${data["Emotion Score"].toFixed(4)}`;
             document.getElementById("resultado").innerText = message;
+            // Mostrar el texto de la reseña
+            if (data["Review Text"]) {
+                document.getElementById("reviewTextContainer").innerText = `Review Text:\n${data["Review Text"]}`;
+            }
             // Actualizar las emociones para el proyecto seleccionado
             const projectName = document.getElementById("projectSelect").value;
             await loadProjectEmotions(projectName);
             await loadGlobalProjectEmotions();
         }
     } catch (error) {
+        console.error("Error fetching data:", error);
         if (!document.getElementById("resultado").innerText) {
             document.getElementById("resultado").innerText = "Something went wrong, retrying...";
         }
+    } finally {
+        clearTimeout(timeoutId); // Limpiar el temporizador en caso de cualquier excepción
     }
 });
 
@@ -326,6 +336,7 @@ document.getElementById("projectSelect").addEventListener("change", async functi
     document.getElementById('rawTextInput').value = '';
     // Además, ocultar los resultados si están visibles
     document.getElementById('resultado').innerHTML = '';
+    document.getElementById("reviewTextContainer").innerText = '';
     document.getElementById('rawTextResultado').innerHTML = '';
 
     const projectName = event.target.value;
@@ -474,7 +485,7 @@ function createGlobalEmotionsChart(data) {
         }
     });
 
-    // Retornar el objeto Chart para poder actualizarlo posteriormente si es necesario
+    // Devolver el objeto Chart para poder actualizarlo posteriormente si es necesario
     return globalEmotionsChart;
 }
 
@@ -490,3 +501,19 @@ function handleResize() {
 
 // Agregar un event listener al evento de redimensionamiento de la ventana
 window.addEventListener('resize', handleResize);
+
+// Desabilitar opción de tripAdvisor
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el elemento select
+    const selectElement = document.getElementById('opcionInput');
+
+    // Iterar sobre las opciones para encontrar TripAdvisor
+    const options = selectElement.options;
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].value === 'TripAdvisor') {
+            // Desactivar la opción de TripAdvisor
+            options[i].disabled = true;
+            break;  // Terminamos el bucle ya que se ha encontrado y desactivado la opción
+        }
+    }
+});
