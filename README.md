@@ -74,6 +74,9 @@ Sigue los siguientes pasos para ejecutar la aplicación:
 Análisis de un texto en bruto:
 ![Demo de la aplicación](media/analize_raw_text.gif)
 
+Análisis de URL:
+![Demo de la aplicación](media/url_analysis.gif)
+
 Cambio y creación de projectos:
 ![Demo de la aplicación](media/project_change_and_creation.gif)
 
